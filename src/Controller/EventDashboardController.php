@@ -103,16 +103,6 @@ class EventDashboardController extends AbstractController
             $event->setOrganiserUuid($organiserUuid);
             $event->setIsActive($request->request->getBoolean('is_active', true));
 
-            // Set GPS coordinates
-            $latitude = $request->request->get('latitude');
-            $longitude = $request->request->get('longitude');
-            if ($latitude !== null && $latitude !== '') {
-                $event->setLatitude((float)$latitude);
-            }
-            if ($longitude !== null && $longitude !== '') {
-                $event->setLongitude((float)$longitude);
-            }
-
             // Set event type
             $eventTypeId = $request->request->get('event_type_id');
             if ($eventTypeId) {
@@ -129,8 +119,11 @@ class EventDashboardController extends AbstractController
             return $this->redirectToRoute('admin_events_list');
         }
 
+        $eventTypes = $this->eventTypeRepository->findAllActive();
+
         return $this->render('event/admin_form.html.twig', [
             'event' => $event,
+            'eventTypes' => $eventTypes,
             'action' => 'new',
         ]);
     }
@@ -171,20 +164,6 @@ class EventDashboardController extends AbstractController
             $event->setOrganiserUuid($request->request->get('organiser_uuid') ?: $event->getOrganiserUuid());
             $event->setIsActive($request->request->getBoolean('is_active', true));
 
-            // Update GPS coordinates
-            $latitude = $request->request->get('latitude');
-            $longitude = $request->request->get('longitude');
-            if ($latitude !== null && $latitude !== '') {
-                $event->setLatitude((float)$latitude);
-            } else {
-                $event->setLatitude(null);
-            }
-            if ($longitude !== null && $longitude !== '') {
-                $event->setLongitude((float)$longitude);
-            } else {
-                $event->setLongitude(null);
-            }
-
             // Update event type
             $eventTypeId = $request->request->get('event_type_id');
             if ($eventTypeId) {
@@ -200,8 +179,11 @@ class EventDashboardController extends AbstractController
             return $this->redirectToRoute('admin_events_list');
         }
 
+        $eventTypes = $this->eventTypeRepository->findAllActive();
+
         return $this->render('event/admin_form.html.twig', [
             'event' => $event,
+            'eventTypes' => $eventTypes,
             'action' => 'edit',
         ]);
     }

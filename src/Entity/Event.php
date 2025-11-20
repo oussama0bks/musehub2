@@ -44,6 +44,9 @@ class Event
     #[ORM\Column(type: 'boolean')]
     private bool $isActive = true;
 
+    #[ORM\ManyToOne(targetEntity: EventType::class, inversedBy: 'events')]
+    #[ORM\JoinColumn(name: 'event_type_id', referencedColumnName: 'id', nullable: true)]
+    private ?EventType $eventType = null;
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -163,6 +166,17 @@ class Event
     public function setLongitude(?float $longitude): self
     {
         $this->longitude = $longitude;
+        return $this;
+    }
+
+    public function getEventType(): ?EventType
+    {
+        return $this->eventType;
+    }
+
+    public function setEventType(?EventType $eventType): self
+    {
+        $this->eventType = $eventType;
         return $this;
     }
 
