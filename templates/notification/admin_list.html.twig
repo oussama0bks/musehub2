@@ -1,0 +1,149 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Gestion Notifications - MuseHub Admin{% endblock %}
+
+{% block body %}
+<div class="mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+        <h1 class="h3 mb-0">Gestion des Notifications</h1>
+        <p class="text-muted mb-0">Suivi des notifications d'événements</p>
+    </div>
+    <form method="POST" action="{{ path('admin_notifications_send_pending') }}" class="d-inline">
+        <input type="hidden" name="_token" value="{{ csrf_token('send_notifications') }}">
+        <button type="submit" class="btn btn-primary" onclick="return confirm('Envoyer toutes les notifications en attente ?')">
+            <i class="fas fa-paper-plane me-2"></i>Envoyer les notifications
+        </button>
+    </form>
+</div>
+
+<!-- Statistiques -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card" style="border-radius: 15px; border-left: 4px solid #f59e0b;">
+            <div class="card-body">
+                <h3 class="text-warning">{{ stats.pending }}</h3>
+                <p class="text-muted mb-0">En attente</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card" style="border-radius: 15px; border-left: 4px solid #10b981;">
+            <div class="card-body">
+                <h3 class="text-success">{{ stats.sent }}</h3>
+                <p class="text-muted mb-0">Envoyées</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card" style="border-radius: 15px; border-left: 4px solid #ef4444;">
+            <div class="card-body">
+                <h3 class="text-danger">{{ stats.failed }}</h3>
+                <p class="text-muted mb-0">Échouées</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liste des notifications -->
+<div class="card" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Événement</th>
+                        <th>Utilisateur</th>
+                        <th>Type</th>
+                        <th>Canal</th>
+                        <th>Planifié</th>
+                        <th>Envoyé</th>
+                        <th>Statut</th>
+                        <th>Tentatives</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notification in notifications %}
+                    <tr>
+                        <td>{{ notification.id }}</td>
+                        <td>
+                            <strong>{{ notification.event.title }}</strong>
+                            <br>
+                            <small class="text-muted">{{ notification.event.dateTime|date('d/m/Y H:i') }}</small>
+                        </td>
+                        <td>
+                            <small>{{ notification.user.email }}</small>
+                        </td>
+                        <td>
+                            {% set typeLabels = {
+                                'reminder_24h': 'Rappel 24h',
+                                'reminder_1h': 'Rappel 1h',
+                                'event_created': 'Confirmation',
+                                'event_updated': 'Mise à jour',
+                                'event_cancelled': 'Annulation'
+                            } %}
+                            <span class="badge bg-info">
+                                {{ typeLabels[notification.type] ?? notification.type }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if notification.channel == 'email' %}
+                                <i class="fas fa-envelope"></i> Email
+                            {% elseif notification.channel == 'sms' %}
+                                <i class="fas fa-sms"></i> SMS
+                            {% else %}
+                                <i class="fas fa-bell"></i> {{ notification.channel }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>{{ notification.scheduledAt|date('d/m/Y H:i') }}</small>
+                        </td>
+                        <td>
+                            {% if notification.sentAt %}
+                                <small class="text-success">{{ notification.sentAt|date('d/m/Y H:i') }}</small>
+                            {% else %}
+                                <small class="text-muted">-</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if notification.status == 'sent' %}
+                                <span class="badge bg-success">Envoyée</span>
+                            {% elseif notification.status == 'pending' %}
+                                <span class="badge bg-warning">En attente</span>
+                            {% else %}
+                                <span class="badge bg-danger">Échouée</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if notification.retryCount > 0 %}
+                                <span class="badge bg-secondary">{{ notification.retryCount }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Aucune notification</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info mt-4">
+    <h6><i class="fas fa-info-circle me-2"></i>Information</h6>
+    <p class="mb-0">
+        Les notifications sont envoyées automatiquement via la commande cron : 
+        <code>php bin/console app:send-event-notifications</code>
+    </p>
+    <p class="mb-0 mt-2">
+        <strong>Configuration recommandée :</strong> Exécuter la commande toutes les 5 minutes
+    </p>
+</div>
+{% endblock %}
