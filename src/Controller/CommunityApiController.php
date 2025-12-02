@@ -10,6 +10,7 @@ use App\Repository\PostReactionRepository;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
 use App\Service\ContentFilter;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,7 +28,8 @@ class CommunityApiController extends AbstractController
         private EntityManagerInterface $em,
         private ContentFilter $contentFilter,
         private UserRepository $userRepository,
-        private PostReactionRepository $postReactionRepository
+        private PostReactionRepository $postReactionRepository,
+        private NotificationService $notificationService
     ) {
     }
 
@@ -266,6 +268,11 @@ class CommunityApiController extends AbstractController
         $this->em->persist($comment);
         $this->em->flush();
 
+        // Create notification for post comment if user is authenticated
+        if ($user) {
+            $this->notificationService->createPostCommentNotification($post, $comment, $user->getUuid());
+        }
+
         $displayName = $user ? ($user->getUsername() ?: $user->getEmail()) : ($data['commenter_name'] ?? $this->formatGuestName($commenterUuid));
 
         return new JsonResponse([
@@ -360,6 +367,11 @@ class CommunityApiController extends AbstractController
 
         $this->em->flush();
 
+        // Create notification if this is a new reaction
+        if ($status === 'created') {
+            $this->notificationService->createPostReactionNotification($post, $user->getUuid(), $type);
+        }
+
         return new JsonResponse([
             'id' => $post->getId(),
             'likes_count' => $post->getLikesCount(),
@@ -372,4 +384,3 @@ class CommunityApiController extends AbstractController
         ]);
     }
 }
-

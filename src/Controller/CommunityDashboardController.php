@@ -26,10 +26,50 @@ class CommunityDashboardController extends AbstractController
     }
 
     #[Route('', name: 'admin_community_list', methods: ['GET'])]
-    public function list(): Response
+    public function list(Request $request): Response
     {
-        $posts = $this->postRepository->findBy([], ['createdAt' => 'DESC'], 100);
-        
+        $categoryId = $request->query->get('category');
+        $sortBy = $request->query->get('sort', 'recent');
+        $search = $request->query->get('search');
+
+        $qb = $this->postRepository->createQueryBuilder('p')
+            ->leftJoin('p.category', 'c')
+            ->addSelect('c');
+
+        // Apply category filter
+        if ($categoryId) {
+            $qb->andWhere('p.category = :categoryId')
+               ->setParameter('categoryId', $categoryId);
+        }
+
+        // Apply search filter
+        if ($search) {
+            $qb->andWhere('p.content LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        // Apply sorting
+        switch ($sortBy) {
+            case 'liked':
+                $qb->orderBy('p.likesCount', 'DESC');
+                break;
+            case 'commented':
+                $qb->addSelect('COUNT(cm.id) as commentCount')
+                   ->leftJoin('p.comments', 'cm')
+                   ->groupBy('p.id')
+                   ->orderBy('commentCount', 'DESC');
+                break;
+            case 'oldest':
+                $qb->orderBy('p.createdAt', 'ASC');
+                break;
+            case 'recent':
+            default:
+                $qb->orderBy('p.createdAt', 'DESC');
+                break;
+        }
+
+        $posts = $qb->setMaxResults(100)->getQuery()->getResult();
+
         // Calculate daily posts
         $dailyPosts = [];
         foreach ($posts as $post) {
@@ -46,6 +86,9 @@ class CommunityDashboardController extends AbstractController
         return $this->render('community/admin_list.html.twig', [
             'posts' => $posts,
             'stats' => $stats,
+            'currentCategory' => $categoryId,
+            'currentSort' => $sortBy,
+            'currentSearch' => $search,
         ]);
     }
 
@@ -164,4 +207,3 @@ class CommunityDashboardController extends AbstractController
         return $this->redirectToRoute('admin_community_list');
     }
 }
-

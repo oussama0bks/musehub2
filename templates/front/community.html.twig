@@ -2,6 +2,62 @@
 
 {% block title %}Communauté - MuseHub{% endblock %}
 
+{% macro render_comment(comment, post, commentAuthorNames, isReply = false) %}
+    {% set commentDisplayName = commentAuthorNames[comment.commenterUuid] ?? (comment.commenterUuid starts with 'guest_' ? 'Invité MuseHub' : 'Utilisateur ' ~ comment.commenterUuid|slice(0,8)) %}
+    {% set canManageComment = app.user and (is_granted('ROLE_ADMIN') or app.user.uuid == comment.commenterUuid) %}
+    <div class="comment-item {{ isReply ? 'ms-4' : '' }}" id="comment-{{ comment.id }}">
+        <div class="comment-avatar">{{ commentDisplayName|slice(0,1)|upper }}</div>
+        <div class="comment-bubble">
+            <div class="comment-author">{{ commentDisplayName }}</div>
+            <div class="comment-meta">{{ comment.createdAt|date('d/m/Y H:i') }}</div>
+            <div class="comment-content">{{ comment.content|nl2br }}</div>
+            <div class="comment-actions">
+                {% if app.user %}
+                    <button type="button" class="btn btn-link text-decoration-none reply-btn" data-comment-id="{{ comment.id }}">
+                        <i class="fas fa-reply me-1"></i>Répondre
+                    </button>
+                {% endif %}
+                {% if canManageComment %}
+                    <button type="button" class="btn btn-link text-decoration-none comment-edit-toggle" data-comment-id="{{ comment.id }}">
+                        <i class="fas fa-pen me-1"></i>Modifier
+                    </button>
+                    <form action="{{ path('web_comments_delete', {postId: post.id, commentId: comment.id}) }}" method="POST" class="d-inline comment-delete-form" data-comment-id="{{ comment.id }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_comment_' ~ comment.id) }}">
+                        <button type="submit" class="btn btn-link text-danger text-decoration-none">
+                            <i class="fas fa-trash-alt me-1"></i>Supprimer
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+            <div class="reply-form d-none" data-comment-id="{{ comment.id }}">
+                <form class="comment-input-group mt-2" action="{{ path('api_posts_comments_reply', {postId: post.id, id: comment.id}) }}" method="POST" data-reply-form>
+                    <input type="text" class="form-control" name="content" placeholder="Répondre à {{ commentDisplayName }}..." required>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+            {% if canManageComment %}
+                <form action="{{ path('web_comments_update', {postId: post.id, commentId: comment.id}) }}" method="POST" class="comment-edit-form d-none" data-comment-id="{{ comment.id }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('update_comment_' ~ comment.id) }}">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold small">Modifier le commentaire</label>
+                        <textarea name="content" rows="3" required>{{ comment.content }}</textarea>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-save me-1"></i>Enregistrer
+                        </button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    {% for reply in comment.replies %}
+        {{ _self.render_comment(reply, post, commentAuthorNames, true) }}
+    {% endfor %}
+{% endmacro %}
+
 {% block stylesheets %}
 {{ parent() }}
 <style>
@@ -324,6 +380,14 @@
                         <input type="file" class="form-control" name="image_file" accept="image/png,image/jpeg,image/webp,image/gif">
                         <input type="url" class="form-control" name="image_url" placeholder="URL de l'image">
                     </div>
+                    <div class="mb-3">
+                        <select class="form-select" name="category_id" required>
+                            <option value="">Choisir une catégorie</option>
+                            <option value="1">News - Actualités et annonces</option>
+                            <option value="2">Questions - Questions et discussions</option>
+                            <option value="3">Memes - Humour et memes</option>
+                        </select>
+                    </div>
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary px-4">
                             <i class="fas fa-paper-plane me-2"></i>Publier
@@ -338,6 +402,36 @@
                 <a href="{{ path('login') }}" class="btn btn-primary px-4">Se connecter</a>
             </div>
         {% endif %}
+
+        <!-- Filters and Sorting -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Filtrer par catégorie</label>
+                        <select class="form-select" id="categoryFilter">
+                            <option value="">Toutes les catégories</option>
+                            <option value="1" {{ currentCategory == '1' ? 'selected' : '' }}>News</option>
+                            <option value="2" {{ currentCategory == '2' ? 'selected' : '' }}>Questions</option>
+                            <option value="3" {{ currentCategory == '3' ? 'selected' : '' }}>Memes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Trier par</label>
+                        <select class="form-select" id="sortFilter">
+                            <option value="recent" {{ currentSort == 'recent' ? 'selected' : '' }}>Plus récent</option>
+                            <option value="liked" {{ currentSort == 'liked' ? 'selected' : '' }}>Plus aimé</option>
+                            <option value="commented" {{ currentSort == 'commented' ? 'selected' : '' }}>Plus commenté</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary w-100" id="applyFilters">
+                            <i class="fas fa-filter me-2"></i>Appliquer les filtres
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         {% for post in posts %}
             <div class="post-item" id="post-{{ post.id }}" data-post-id="{{ post.id }}">
@@ -448,42 +542,15 @@
 
                 <div class="comments-section" id="comments-{{ post.id }}">
                     <div id="comments-list-{{ post.id }}">
+                        {% set topLevelComments = [] %}
                         {% for comment in post.comments %}
-                            {% set commentDisplayName = commentAuthorNames[comment.commenterUuid] ?? (comment.commenterUuid starts with 'guest_' ? 'Invité MuseHub' : 'Utilisateur ' ~ comment.commenterUuid|slice(0,8)) %}
-                            {% set canManageComment = app.user and (is_granted('ROLE_ADMIN') or app.user.uuid == comment.commenterUuid) %}
-                            <div class="comment-item">
-                                <div class="comment-avatar">{{ commentDisplayName|slice(0,1)|upper }}</div>
-                                <div class="comment-bubble">
-                                    <div class="comment-author">{{ commentDisplayName }}</div>
-                                    <div class="comment-meta">{{ comment.createdAt|date('d/m/Y H:i') }}</div>
-                                    <div class="comment-content">{{ comment.content|nl2br }}</div>
-                                    {% if canManageComment %}
-                                        <div class="comment-actions">
-                                            <button type="button" class="btn btn-link text-decoration-none comment-edit-toggle" data-comment-id="{{ comment.id }}">
-                                                <i class="fas fa-pen me-1"></i>Modifier
-                                            </button>
-                                            <form action="{{ path('web_comments_delete', {postId: post.id, commentId: comment.id}) }}" method="POST" class="d-inline comment-delete-form" data-comment-id="{{ comment.id }}">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('delete_comment_' ~ comment.id) }}">
-                                                <button type="submit" class="btn btn-link text-danger text-decoration-none">
-                                                    <i class="fas fa-trash-alt me-1"></i>Supprimer
-                                                </button>
-                                            </form>
-                                        </div>
-                                        <form action="{{ path('web_comments_update', {postId: post.id, commentId: comment.id}) }}" method="POST" class="comment-edit-form d-none" data-comment-id="{{ comment.id }}">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('update_comment_' ~ comment.id) }}">
-                                            <div class="mb-2">
-                                                <label class="form-label fw-semibold small">Modifier le commentaire</label>
-                                                <textarea name="content" rows="3" required>{{ comment.content }}</textarea>
-                                            </div>
-                                            <div class="text-end">
-                                                <button type="submit" class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-save me-1"></i>Enregistrer
-                                                </button>
-                                            </div>
-                                        </form>
-                                    {% endif %}
-                                </div>
-                            </div>
+                            {% if comment.parentComment is null %}
+                                {% set topLevelComments = topLevelComments|merge([comment]) %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {% for comment in topLevelComments %}
+                            {{ _self.render_comment(comment, post, commentAuthorNames) }}
                         {% else %}
                             <p class="text-muted text-center py-3 mb-0">Soyez le premier à commenter</p>
                         {% endfor %}
@@ -574,6 +641,72 @@
                         event.preventDefault();
                     }
                 });
+            });
+
+            document.querySelectorAll('.reply-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!isAuthenticated) {
+                        window.location.href = loginUrl;
+                        return;
+                    }
+
+                    const commentId = this.dataset.commentId;
+                    toggleVisibility(`[data-comment-id="${commentId}"].reply-form`);
+                });
+            });
+
+            document.querySelectorAll('[data-reply-form]').forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(this);
+                    const content = formData.get('content');
+                    const commentId = this.closest('.reply-form').dataset.commentId;
+                    const url = this.action;
+
+                    if (!content || content.trim() === '') {
+                        alert('Le contenu de la réponse est requis.');
+                        return;
+                    }
+
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ content: content.trim() }),
+                        credentials: 'same-origin'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(data.error);
+                        } else {
+                            // Reload the page to show the new reply
+                            window.location.reload();
+                        }
+                    })
+                    .catch(() => {
+                        alert('Erreur lors de l\'envoi de la réponse.');
+                    });
+                });
+            });
+
+            // Filter functionality
+            document.getElementById('applyFilters').addEventListener('click', function() {
+                const categoryId = document.getElementById('categoryFilter').value;
+                const sortBy = document.getElementById('sortFilter').value;
+
+                const params = new URLSearchParams();
+                if (categoryId) {
+                    params.set('category', categoryId);
+                }
+                if (sortBy && sortBy !== 'recent') {
+                    params.set('sort', sortBy);
+                }
+
+                const url = '{{ path('community') }}' + (params.toString() ? '?' + params.toString() : '');
+                window.location.href = url;
             });
         });
     })();

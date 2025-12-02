@@ -2,6 +2,7 @@
 namespace App\Repository;
 
 use App\Entity\Comment;
+use App\Entity\Post;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -20,17 +21,66 @@ class CommentRepository extends ServiceEntityRepository
         parent::__construct($registry, Comment::class);
     }
 
-    // Méthodes personnalisées possibles ici
 
-    /*
-    public function findByPostId(int $postId): array
+    /**
+     * Find only root-level comments (no parent) for a post
+     * @return Comment[]
+     */
+    public function findRootCommentsByPost(Post $post): array
     {
         return $this->createQueryBuilder('c')
-            ->andWhere('c.post = :postId')
-            ->setParameter('postId', $postId)
+            ->where('c.post = :post')
+            ->andWhere('c.parentComment IS NULL')
+            ->setParameter('post', $post)
             ->orderBy('c.createdAt', 'ASC')
             ->getQuery()
             ->getResult();
     }
-    */
+
+    /**
+     * Find replies to a specific comment
+     * @return Comment[]
+     */
+    public function findRepliesByParent(Comment $parent): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.parentComment = :parent')
+            ->setParameter('parent', $parent)
+            ->orderBy('c.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Build a hierarchical tree of comments for a post
+     * @return array
+     */
+    public function getCommentTree(Post $post): array
+    {
+        $rootComments = $this->findRootCommentsByPost($post);
+
+        $tree = [];
+        foreach ($rootComments as $comment) {
+            $tree[] = $this->buildCommentNode($comment);
+        }
+
+        return $tree;
+    }
+
+    /**
+     * Recursively build comment node with replies
+     */
+    private function buildCommentNode(Comment $comment): array
+    {
+        $node = [
+            'comment' => $comment,
+            'replies' => []
+        ];
+
+        foreach ($comment->getReplies() as $reply) {
+            $node['replies'][] = $this->buildCommentNode($reply);
+        }
+
+        return $node;
+    }
 }

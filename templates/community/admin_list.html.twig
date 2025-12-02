@@ -33,10 +33,45 @@
     </div>
 </div>
 
+<!-- Filtres et tri -->
+<div class="card mb-4" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Rechercher</label>
+                <input type="text" class="form-control" id="adminSearchInput" placeholder="Rechercher dans le contenu..." value="{{ currentSearch }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Filtrer par catégorie</label>
+                <select class="form-select" id="adminCategoryFilter">
+                    <option value="">Toutes les catégories</option>
+                    <option value="1" {{ currentCategory == '1' ? 'selected' : '' }}>News</option>
+                    <option value="2" {{ currentCategory == '2' ? 'selected' : '' }}>Questions</option>
+                    <option value="3" {{ currentCategory == '3' ? 'selected' : '' }}>Memes</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Trier par</label>
+                <select class="form-select" id="adminSortFilter">
+                    <option value="recent" {{ currentSort == 'recent' ? 'selected' : '' }}>Plus récent</option>
+                    <option value="oldest" {{ currentSort == 'oldest' ? 'selected' : '' }}>Plus ancien</option>
+                    <option value="liked" {{ currentSort == 'liked' ? 'selected' : '' }}>Plus aimé</option>
+                    <option value="commented" {{ currentSort == 'commented' ? 'selected' : '' }}>Plus commenté</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="button" class="btn btn-primary w-100" id="adminApplyFilters">
+                    <i class="fas fa-filter me-2"></i>Appliquer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Liste des posts -->
 <div class="card" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
     <div class="card-header bg-white">
-        <h5 class="mb-0"><i class="fas fa-comments me-2"></i>Posts</h5>
+        <h5 class="mb-0"><i class="fas fa-comments me-2"></i>Posts ({{ posts|length }})</h5>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -90,6 +125,40 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('adminSearchInput');
+    const categoryFilter = document.getElementById('adminCategoryFilter');
+    const sortFilter = document.getElementById('adminSortFilter');
+    const applyBtn = document.getElementById('adminApplyFilters');
+
+    applyBtn.addEventListener('click', function() {
+        const search = searchInput.value.trim();
+        const category = categoryFilter.value;
+        const sort = sortFilter.value;
+
+        const params = new URLSearchParams();
+        if (search) {
+            params.set('search', search);
+        }
+        if (category) {
+            params.set('category', category);
+        }
+        if (sort && sort !== 'recent') {
+            params.set('sort', sort);
+        }
+
+        const url = '{{ path('admin_community_list') }}' + (params.toString() ? '?' + params.toString() : '');
+        window.location.href = url;
+    });
+
+    // Optional: Auto-apply on Enter key in search
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            applyBtn.click();
+        }
+    });
+});
+</script>
 {% endblock %}
-
-

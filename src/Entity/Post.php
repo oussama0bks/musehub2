@@ -20,6 +20,10 @@ class Post
     #[ORM\Column(type:"string", nullable:true)]
     private ?string $imageUrl = null;
 
+    #[ORM\ManyToOne(targetEntity: PostCategory::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?PostCategory $category = null;
+
     #[ORM\Column(type:"datetime")]
     private \DateTimeInterface $createdAt;
 
@@ -53,6 +57,9 @@ class Post
 
     public function getImageUrl(): ?string { return $this->imageUrl; }
     public function setImageUrl(?string $imageUrl): self { $this->imageUrl = $imageUrl; return $this; }
+
+    public function getCategory(): ?PostCategory { return $this->category; }
+    public function setCategory(?PostCategory $category): self { $this->category = $category; return $this; }
 
     public function getCreatedAt(): \DateTimeInterface { return $this->createdAt; }
 
