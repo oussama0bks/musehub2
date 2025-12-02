@@ -1,0 +1,90 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{% if action == 'new' %}Créer{% else %}Éditer{% endif %} une Offre - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="mb-4">
+                <i class="fas fa-{% if action == 'new' %}plus{% else %}edit{% endif %}-circle"></i>
+                {% if action == 'new' %}Créer une Nouvelle Offre{% else %}Éditer l'Offre #{{ offre.id }}{% endif %}
+            </h1>
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="_token" value="{{ csrf_token(action == 'new' ? 'create_offre_admin' : 'edit_offre_' ~ offre.id) }}">
+
+                        <!-- Annonce -->
+                        <div class="mb-3">
+                            <label class="form-label">Annonce *</label>
+                            <select name="listing_id" class="form-select" required {% if action == 'edit' %}disabled{% endif %}>
+                                <option value="">Sélectionnez une annonce</option>
+                                {% for listing in listings %}
+                                    <option value="{{ listing.id }}" {% if offre.listing and offre.listing.id == listing.id %}selected{% endif %}>
+                                        #{{ listing.id }} - {{ listing.price }} €
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if offre.listing %}
+                                <input type="hidden" name="listing_id" value="{{ offre.listing.id }}">
+                            {% endif %}
+                        </div>
+
+                        <!-- Acheteur (pour création) -->
+                        {% if action == 'new' %}
+                        <div class="mb-3">
+                            <label class="form-label">Acheteur *</label>
+                            <input type="email" name="utilisateur_id" class="form-control" placeholder="ID ou Email de l'acheteur" required>
+                            <small class="text-muted">Note: À améliorer avec un sélecteur d'utilisateurs</small>
+                        </div>
+                        {% endif %}
+
+                        <!-- Acheteur (affichage pour édition) -->
+                        {% if action == 'edit' and offre.utilisateur %}
+                        <div class="mb-3">
+                            <label class="form-label">Acheteur</label>
+                            <input type="text" class="form-control" value="{{ offre.utilisateur.email }}" disabled>
+                        </div>
+                        {% endif %}
+
+                        <!-- Prix Proposé -->
+                        <div class="mb-3">
+                            <label class="form-label">Prix Proposé (€) *</label>
+                            <input type="number" name="prix_propose" class="form-control" step="0.01" value="{{ offre.prixPropose ?: '' }}" required>
+                        </div>
+
+                        <!-- Statut -->
+                        <div class="mb-3">
+                            <label class="form-label">Statut *</label>
+                            <select name="statut" class="form-select" required>
+                                <option value="En attente" {% if offre.statut == 'En attente' %}selected{% endif %}>En attente</option>
+                                <option value="Acceptée" {% if offre.statut == 'Acceptée' %}selected{% endif %}>Acceptée</option>
+                                <option value="Refusée" {% if offre.statut == 'Refusée' %}selected{% endif %}>Refusée</option>
+                            </select>
+                        </div>
+
+                        <!-- Commentaire -->
+                        <div class="mb-3">
+                            <label class="form-label">Commentaire</label>
+                            <textarea name="commentaire" class="form-control" rows="4">{{ offre.commentaire ?: '' }}</textarea>
+                        </div>
+
+                        <!-- Boutons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                {% if action == 'new' %}Créer l'Offre{% else %}Mettre à Jour{% endif %}
+                            </button>
+                            <a href="{{ path('admin_offre_list') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

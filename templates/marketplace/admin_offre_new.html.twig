@@ -1,0 +1,158 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Nouvelle Offre - MuseHub Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Nouvelle Offre</h1>
+            <p class="text-muted mb-0">Créer une nouvelle offre manuellement</p>
+        </div>
+        <a href="{{ path('admin_offre_list') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            {{ form_label(form.listing, 'Annonce', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.listing, {'attr': {'class': 'form-select'}}) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.listing) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            {{ form_label(form.utilisateur, 'Acheteur', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.utilisateur, {
+                                'attr': {
+                                    'class': 'form-select'
+                                }
+                            }) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.utilisateur) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            {{ form_label(form.prixPropose, 'Prix proposé (€)', {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group">
+                                {{ form_widget(form.prixPropose, {'attr': {'class': 'form-control', 'step': '0.01', 'min': '0'}}) }}
+                                <span class="input-group-text">€</span>
+                            </div>
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.prixPropose) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            {{ form_label(form.statut, 'Statut', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.statut) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            {{ form_label(form.datePropose, 'Date de l\'offre', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.datePropose, {'attr': {'class': 'form-control'}}) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.datePropose) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-4">
+                    {{ form_label(form.commentaire, 'Commentaire', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.commentaire, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                    <div class="invalid-feedback">
+                        {{ form_errors(form.commentaire) }}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ path('admin_offre_list') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Enregistrer
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* Styles personnalisés pour le formulaire */
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .is-invalid {
+        border-color: #dc3545;
+    }
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875em;
+    }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    // Activer les tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Validation du formulaire
+    (function() {
+        'use strict';
+        
+        // Récupérer les champs du formulaire
+        var forms = document.querySelectorAll('.needs-validation');
+        
+        // Désactiver la soumission du formulaire s'il y a des champs invalides
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                form.classList.add('was-validated');
+            }, false);
+        });
+        
+        // Initialisation de Select2 si disponible
+        if (typeof $ !== 'undefined' && $.fn.select2) {
+            $('select.form-select').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'Sélectionnez une option',
+                allowClear: true
+            });
+        }
+    })();
+</script>
+{% endblock %}
+{% endblock %}

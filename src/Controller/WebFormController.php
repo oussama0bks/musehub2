@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Artwork;
 use App\Entity\Listing;
+use App\Entity\Offre;
 use App\Entity\Post;
 use App\Entity\Comment;
 use App\Entity\Participant;
@@ -11,6 +12,7 @@ use App\Repository\ArtworkRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
 use App\Repository\ListingRepository;
+use App\Repository\OffreRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\PostRepository;
 use App\Repository\CommentRepository;
@@ -30,6 +32,7 @@ class WebFormController extends AbstractController
         private ArtworkRepository $artworkRepository,
         private CategoryRepository $categoryRepository,
         private ListingRepository $listingRepository,
+        private OffreRepository $offreRepository,
         private EventRepository $eventRepository,
         private ParticipantRepository $participantRepository,
         private ContentFilter $contentFilter
@@ -186,7 +189,7 @@ class WebFormController extends AbstractController
     }
 
     #[Route('/marketplace/listing/create', name: 'web_marketplace_listing_create', methods: ['POST'])]
-    #[IsGranted('ROLE_ARTIST')]
+    #[IsGranted('ROLE_USER')]
     public function createListing(Request $request): Response
     {
         $artworkUuid = $request->request->get('artwork_uuid');
@@ -544,6 +547,47 @@ class WebFormController extends AbstractController
 
         $this->addFlash('success', 'Commentaire supprimé.');
         return $this->redirectToRoute('community', ['_fragment' => 'post-' . $post->getId()]);
+    }
+
+    #[Route('/marketplace/offre/create', name: 'web_marketplace_offre_create', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function createOffre(Request $request): Response
+    {
+        $listingId = $request->request->get('listing_id');
+        $prixPropose = $request->request->get('prix_propose');
+        $commentaire = $request->request->get('commentaire');
+
+        if (!$listingId || !$prixPropose) {
+            $this->addFlash('error', 'Annonce et prix proposé sont requis.');
+            return $this->redirectToRoute('marketplace');
+        }
+
+        $listing = $this->listingRepository->find($listingId);
+        if (!$listing) {
+            $this->addFlash('error', 'Annonce non trouvée.');
+            return $this->redirectToRoute('marketplace');
+        }
+
+        $user = $this->getUser();
+        if (!$user) {
+            $this->addFlash('error', 'Vous devez être connecté.');
+            return $this->redirectToRoute('login');
+        }
+
+        $offre = new Offre();
+        $offre->setListing($listing);
+        $offre->setUtilisateur($user);
+        $offre->setPrixPropose((string)$prixPropose);
+        $offre->setStatut('En attente');
+        if ($commentaire) {
+            $offre->setCommentaire($commentaire);
+        }
+
+        $this->em->persist($offre);
+        $this->em->flush();
+
+        $this->addFlash('success', 'Offre créée avec succès !');
+        return $this->redirectToRoute('marketplace');
     }
 }
 

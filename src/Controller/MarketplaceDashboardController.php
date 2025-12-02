@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Listing;
 use App\Repository\ListingRepository;
+use App\Repository\OffreRepository;
 use App\Repository\TransactionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +19,7 @@ class MarketplaceDashboardController extends AbstractController
 {
     public function __construct(
         private ListingRepository $listingRepository,
+        private OffreRepository $offreRepository,
         private TransactionRepository $transactionRepository,
         private EntityManagerInterface $em
     ) {
@@ -54,12 +56,31 @@ class MarketplaceDashboardController extends AbstractController
 
         $listings = $listingQb->getQuery()->getResult();
 
+    // Statistiques Offres
+        $offres = $this->offreRepository->findAll();
+        $offres_en_attente = count(array_filter($offres, fn($o) => $o->getStatut() === 'En attente'));
+        $offres_acceptees = count(array_filter($offres, fn($o) => $o->getStatut() === 'Acceptée'));
+        $offres_refusees = count(array_filter($offres, fn($o) => $o->getStatut() === 'Refusée'));
+        $offres_total = count($offres);
+
+        // 5 dernières offres (ordre décroissant par datePropose)
+        $recentOffresQb = $this->offreRepository->createQueryBuilder('o')
+            ->orderBy('o.datePropose', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery();
+        $recent_offres = $recentOffresQb->getResult();
         return $this->render('marketplace/admin_list.html.twig', [
             'transactions' => $transactions,
             'listings' => $listings,
             'revenue' => $revenue,
             'period' => $period,
             'status' => $status,
+                    'offres_en_attente' => $offres_en_attente,
+                    'offres_acceptees' => $offres_acceptees,
+                    'offres_refusees' => $offres_refusees,
+                    'offres_total' => $offres_total,
+                    'offres' => $offres,
+                    'recent_offres' => $recent_offres,
         ]);
     }
 

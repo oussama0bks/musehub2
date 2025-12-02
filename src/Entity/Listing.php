@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ListingRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ListingRepository::class)]
@@ -32,10 +34,14 @@ class Listing
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
+    #[ORM\OneToMany(mappedBy: 'listing', targetEntity: Offre::class, cascade: ['persist', 'remove'])]
+    private Collection $offres;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->uuid = $this->generateUuid();
+        $this->offres = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -106,6 +112,36 @@ class Listing
     public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Offre>
+     */
+    public function getOffres(): Collection
+    {
+        return $this->offres;
+    }
+
+    public function addOffre(Offre $offre): self
+    {
+        if (!$this->offres->contains($offre)) {
+            $this->offres->add($offre);
+            $offre->setListing($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOffre(Offre $offre): self
+    {
+        if ($this->offres->removeElement($offre)) {
+            // set the owning side to null (unless already changed)
+            if ($offre->getListing() === $this) {
+                $offre->setListing(null);
+            }
+        }
+
         return $this;
     }
 

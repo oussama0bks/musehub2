@@ -6,6 +6,7 @@ use App\Repository\ArtworkRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
 use App\Repository\ListingRepository;
+use App\Repository\OffreRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\PostReactionRepository;
 use App\Repository\PostRepository;
@@ -21,6 +22,7 @@ class FrontOfficeController extends AbstractController
         private CategoryRepository $categoryRepository,
         private EventRepository $eventRepository,
         private ListingRepository $listingRepository,
+        private OffreRepository $offreRepository,
         private PostRepository $postRepository,
         private PostReactionRepository $postReactionRepository,
         private ParticipantRepository $participantRepository,
@@ -156,9 +158,32 @@ class FrontOfficeController extends AbstractController
             );
         }
 
+        // Récupérer les offres pour chaque listing
+        $offresParListing = [];
+        foreach ($listings as $listing) {
+            $offresParListing[$listing->getId()] = $this->offreRepository->findByListing($listing->getId());
+        }
+
         return $this->render('front/marketplace.html.twig', [
             'listings' => $listings,
             'userArtworks' => $userArtworks,
+            'offresParListing' => $offresParListing,
+        ]);
+    }
+
+    #[Route('/marketplace/test', name: 'marketplace_test')]
+    public function marketplaceTest(): Response
+    {
+        $listings = $this->listingRepository->findAvailable();
+        
+        $offresParListing = [];
+        foreach ($listings as $listing) {
+            $offresParListing[$listing->getId()] = $this->offreRepository->findByListing($listing->getId());
+        }
+
+        return $this->render('front/marketplace_test.html.twig', [
+            'listings' => $listings,
+            'offresParListing' => $offresParListing,
         ]);
     }
 
