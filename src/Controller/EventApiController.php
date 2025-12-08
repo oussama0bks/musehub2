@@ -234,5 +234,99 @@ class EventApiController extends AbstractController
 
         return new JsonResponse(['message' => 'Successfully left event']);
     }
+
+    #[Route('/{id}/ics', name: 'api_events_ics', methods: ['GET'])]
+    public function exportIcs(int $id): Response
+    {
+        $event = $this->eventRepository->find($id);
+        if (!$event) {
+            return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Générer le contenu iCalendar
+        $ics = $this->generateIcsContent($event);
+
+        // Retourner le fichier avec le bon mime type
+        return new Response(
+            $ics,
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'text/calendar; charset=utf-8',
+                'Content-Disposition' => 'attachment; filename="' . $this->sanitizeFilename($event->getTitle()) . '.ics"',
+            ]
+        );
+    }
+
+    /**
+     * Génère le contenu au format iCalendar (RFC 5545)
+     */
+    private function generateIcsContent(Event $event): string
+    {
+        $now = (new \DateTimeImmutable())->format('Ymd\THis\Z');
+        $eventDate = $event->getDateTime()->format('Ymd\THis');
+        $eventDateEnd = $event->getDateTime()->modify('+2 hours')->format('Ymd\THis');
+        
+        // Sanitiser les champs texte (remplacer les caractères spéciaux)
+        $title = $this->escapeIcsText($event->getTitle());
+        $description = $this->escapeIcsText($event->getDescription() ?? '');
+        $location = $this->escapeIcsText(
+            $event->getLocation() === 'online' 
+                ? 'En ligne' 
+                : $event->getLocation()
+        );
+
+        // Construire l'iCalendar selon RFC 5545
+        $ics = <<<ICS
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//MuseHub//MuseHub Calendar//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:MuseHub Events
+X-WR-TIMEZONE:Europe/Paris
+BEGIN:VEVENT
+UID:{$event->getUuid()}@musehub.local
+DTSTAMP:{$now}
+DTSTART:{$eventDate}
+DTEND:{$eventDateEnd}
+SUMMARY:{$title}
+DESCRIPTION:{$description}
+LOCATION:{$location}
+URL:http://127.0.0.1:8001/events
+STATUS:CONFIRMED
+SEQUENCE:0
+END:VEVENT
+END:VCALENDAR
+ICS;
+
+        return $ics;
+    }
+
+    /**
+     * Échappe les caractères spéciaux pour iCalendar
+     */
+    private function escapeIcsText(string $text): string
+    {
+        // Remplacer les caractères spéciaux selon RFC 5545
+        $text = str_replace('\\', '\\\\', $text);
+        $text = str_replace(',', '\,', $text);
+        $text = str_replace(';', '\;', $text);
+        $text = str_replace("\n", '\\n', $text);
+        $text = str_replace("\r", '', $text);
+        
+        return trim($text);
+    }
+
+    /**
+     * Nettoie le nom du fichier
+     */
+    private function sanitizeFilename(string $filename): string
+    {
+        // Remplacer les caractères non alphanumériques
+        $filename = preg_replace('/[^a-zA-Z0-9._-]/', '_', $filename);
+        $filename = substr($filename, 0, 100); // Limiter la longueur
+        
+        return $filename ?: 'event';
+    }
 }
 
