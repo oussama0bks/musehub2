@@ -88,23 +88,24 @@
                 </thead>
                 <tbody>
                     {% for post in posts %}
+                    {% set postEntity = currentSort == 'commented' ? post[0] : post %}
                     <tr>
-                        <td>{{ post.id }}</td>
-                        <td><code>{{ post.authorUuid|slice(0, 8) }}...</code></td>
-                        <td>{{ post.content|slice(0, 50) }}{% if post.content|length > 50 %}...{% endif %}</td>
+                        <td>{{ postEntity.id }}</td>
+                        <td><code>{{ postEntity.authorUuid|slice(0, 8) }}...</code></td>
+                        <td>{{ postEntity.content|slice(0, 50) }}{% if postEntity.content|length > 50 %}...{% endif %}</td>
                         <td>
                             <span class="badge bg-danger">
-                                <i class="fas fa-heart me-1"></i>{{ post.likesCount }}
+                                <i class="fas fa-heart me-1"></i>{{ postEntity.likesCount }}
                             </span>
                         </td>
-                        <td>{{ post.createdAt|date('d/m/Y H:i') }}</td>
+                        <td>{{ postEntity.createdAt|date('d/m/Y H:i') }}</td>
                         <td>
                             <div class="d-flex justify-content-end gap-2">
-                                <a href="{{ path('admin_community_post_edit', {id: post.id}) }}" class="btn btn-sm btn-outline-secondary">
+                                <a href="{{ path('admin_community_post_edit', {id: postEntity.id}) }}" class="btn btn-sm btn-outline-secondary">
                                     Modifier
                                 </a>
-                                <form action="{{ path('admin_community_post_delete', {id: post.id}) }}" method="POST" onsubmit="return confirm('Supprimer ce post ?');">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_post_' ~ post.id) }}">
+                                <form action="{{ path('admin_community_post_delete', {id: postEntity.id}) }}" method="POST" onsubmit="return confirm('Supprimer ce post ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_post_' ~ postEntity.id) }}">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">
                                         Supprimer
                                     </button>

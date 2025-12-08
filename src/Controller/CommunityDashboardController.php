@@ -49,6 +49,7 @@ class CommunityDashboardController extends AbstractController
         }
 
         // Apply sorting
+        $isCommentedSort = false;
         switch ($sortBy) {
             case 'liked':
                 $qb->orderBy('p.likesCount', 'DESC');
@@ -58,6 +59,7 @@ class CommunityDashboardController extends AbstractController
                    ->leftJoin('p.comments', 'cm')
                    ->groupBy('p.id')
                    ->orderBy('commentCount', 'DESC');
+                $isCommentedSort = true;
                 break;
             case 'oldest':
                 $qb->orderBy('p.createdAt', 'ASC');
@@ -73,7 +75,9 @@ class CommunityDashboardController extends AbstractController
         // Calculate daily posts
         $dailyPosts = [];
         foreach ($posts as $post) {
-            $date = $post->getCreatedAt()->format('Y-m-d');
+            // Handle array results for commented sort
+            $postEntity = $isCommentedSort ? $post[0] : $post;
+            $date = $postEntity->getCreatedAt()->format('Y-m-d');
             $dailyPosts[$date] = ($dailyPosts[$date] ?? 0) + 1;
         }
 

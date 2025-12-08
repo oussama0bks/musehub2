@@ -9,6 +9,7 @@ use App\Repository\CommentRepository;
 use App\Repository\PostReactionRepository;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
+use App\Service\CommentModerationService;
 use App\Service\ContentFilter;
 use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,6 +28,7 @@ class CommunityApiController extends AbstractController
         private CommentRepository $commentRepository,
         private EntityManagerInterface $em,
         private ContentFilter $contentFilter,
+        private CommentModerationService $commentModerationService,
         private UserRepository $userRepository,
         private PostReactionRepository $postReactionRepository,
         private NotificationService $notificationService
@@ -53,7 +55,7 @@ class CommunityApiController extends AbstractController
         $posts = $qb->getQuery()->getResult();
 
         $data = array_map(function (Post $post) {
-            return [
+            $postData = [
                 'id' => $post->getId(),
                 'author_uuid' => $post->getAuthorUuid(),
                 'content' => $post->getContent(),
@@ -62,7 +64,14 @@ class CommunityApiController extends AbstractController
                 'dislikes_count' => $post->getDislikesCount(),
                 'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
                 'comments_count' => $post->getComments()->count(),
+                'moderation_status' => $post->getModerationStatus(),
             ];
+
+            if ($post->isFlagged()) {
+                $postData['moderation_details'] = $post->getModerationDetails();
+            }
+
+            return $postData;
         }, $posts);
 
         return new JsonResponse([
@@ -85,27 +94,55 @@ class CommunityApiController extends AbstractController
             return new JsonResponse(['error' => 'Content is required'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Filter content
+        // Check for OpenAI toxicity first
+        $toxicityCheck = $this->commentModerationService->checkToxicity($data['content']);
+        $moderationStatus = 'approved';
+        $moderationDetails = null;
+
+        if ($toxicityCheck['isToxic']) {
+            $moderationStatus = 'flagged';
+            $moderationDetails = [
+                'toxicity_score' => $toxicityCheck['score'],
+                'toxicity_categories' => $toxicityCheck['categories'],
+                'flagged_by' => 'openai_moderation'
+            ];
+        }
+
+        // Basic content filtering for banned words/patterns
         $filterResult = $this->contentFilter->filterContent($data['content']);
         if (!$filterResult['isValid']) {
-            return new JsonResponse([
-                'error' => 'Content validation failed',
-                'issues' => $filterResult['issues'],
-            ], Response::HTTP_BAD_REQUEST);
+            if ($moderationStatus === 'approved') {
+                $moderationStatus = 'flagged';
+            }
+            if ($moderationDetails === null) {
+                $moderationDetails = [];
+            }
+            $moderationDetails['content_filter_issues'] = $filterResult['issues'];
+            $moderationDetails['flagged_by'] = 'content_filter';
         }
 
         $post = new Post();
         $post->setAuthorUuid($user->getUuid());
         $post->setContent($filterResult['filteredContent']);
         $post->setImageUrl($data['image_url'] ?? null);
+        $post->setModerationStatus($moderationStatus);
+        $post->setModerationDetails($moderationDetails);
 
         $this->em->persist($post);
         $this->em->flush();
 
-        return new JsonResponse([
+        $responseData = [
             'id' => $post->getId(),
             'message' => 'Post created successfully',
-        ], Response::HTTP_CREATED);
+            'moderation_status' => $moderationStatus,
+            'toxicity_score' => $toxicityCheck['score']
+        ];
+
+        if ($moderationStatus === 'flagged') {
+            $responseData['moderation_details'] = $moderationDetails;
+        }
+
+        return new JsonResponse($responseData, Response::HTTP_CREATED);
     }
 
     #[Route('/{id}/comments', name: 'api_posts_comments', methods: ['GET'])]
