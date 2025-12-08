@@ -136,9 +136,7 @@ class PasswordResetWebController extends AbstractController
     #[Route('/reset-password/{token}', name: 'password_reset_form', methods: ['GET', 'POST'])]
     public function resetPassword(Request $request, string $token): Response
     {
-        if ($this->getUser()) {
-            return $this->redirectToRoute('home');
-        }
+
 
         $user = $this->passwordResetManager->findUserForToken($token);
 
