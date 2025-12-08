@@ -213,6 +213,8 @@ class FrontOfficeController extends AbstractController
             'authorNames' => $authorNames,
             'commentAuthorNames' => $commentAuthorNames,
             'userReactions' => $userReactions,
+            'currentCategory' => null,
+            'currentSort' => 'recent',
         ]);
     }
 
