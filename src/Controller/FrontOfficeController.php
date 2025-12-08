@@ -46,7 +46,7 @@ class FrontOfficeController extends AbstractController
             : $visibleArtworks;
 
         $artistNames = $this->buildArtistNamesMap($visibleArtworks);
-        
+
         $upcomingEvents = $this->eventRepository->findUpcoming();
         $latestPosts = $this->postRepository->findBy([], ['createdAt' => 'DESC'], 3);
 
@@ -175,7 +175,7 @@ class FrontOfficeController extends AbstractController
     public function marketplaceTest(): Response
     {
         $listings = $this->listingRepository->findAvailable();
-        
+
         $offresParListing = [];
         foreach ($listings as $listing) {
             $offresParListing[$listing->getId()] = $this->offreRepository->findByListing($listing->getId());
@@ -201,7 +201,7 @@ class FrontOfficeController extends AbstractController
     }
 
     #[Route('/community', name: 'community')]
-    public function community(): Response
+    public function community(\Symfony\Component\HttpFoundation\Request $request): Response
     {
         $posts = $this->postRepository->findBy([], ['createdAt' => 'DESC'], 20);
         $authorNames = $this->buildAuthorNamesMap($posts);
@@ -213,8 +213,8 @@ class FrontOfficeController extends AbstractController
             'authorNames' => $authorNames,
             'commentAuthorNames' => $commentAuthorNames,
             'userReactions' => $userReactions,
-            'currentCategory' => null,
-            'currentSort' => 'recent',
+            'currentCategory' => $request->query->get('category', ''),
+            'currentSort' => $request->query->get('sort', 'recent'),
         ]);
     }
 
