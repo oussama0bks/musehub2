@@ -118,6 +118,16 @@ class EventDashboardController extends AbstractController
             $event->setOrganiserUuid($organiserUuid);
             $event->setIsActive($request->request->getBoolean('is_active', true));
 
+            // Set GPS coordinates
+            $latitude = $request->request->get('latitude');
+            $longitude = $request->request->get('longitude');
+            if ($latitude !== null && $latitude !== '') {
+                $event->setLatitude((float)$latitude);
+            }
+            if ($longitude !== null && $longitude !== '') {
+                $event->setLongitude((float)$longitude);
+            }
+
             // Set event type
             $eventTypeId = $request->request->get('event_type_id');
             if ($eventTypeId) {
@@ -178,6 +188,20 @@ class EventDashboardController extends AbstractController
             $event->setLocation($request->request->get('location', 'online'));
             $event->setOrganiserUuid($request->request->get('organiser_uuid') ?: $event->getOrganiserUuid());
             $event->setIsActive($request->request->getBoolean('is_active', true));
+
+            // Update GPS coordinates
+            $latitude = $request->request->get('latitude');
+            $longitude = $request->request->get('longitude');
+            if ($latitude !== null && $latitude !== '') {
+                $event->setLatitude((float)$latitude);
+            } else {
+                $event->setLatitude(null);
+            }
+            if ($longitude !== null && $longitude !== '') {
+                $event->setLongitude((float)$longitude);
+            } else {
+                $event->setLongitude(null);
+            }
 
             // Update event type
             $eventTypeId = $request->request->get('event_type_id');
