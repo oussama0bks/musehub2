@@ -350,13 +350,6 @@
         background: rgba(127, 0, 255, 0.08);
         color: #7f00ff;
     }
-    .flagged-post {
-        border-left: 4px solid #ffc107;
-        background: linear-gradient(135deg, rgba(255, 193, 7, 0.05), rgba(255, 193, 7, 0.02));
-    }
-    .flagged-post .post-content {
-        opacity: 0.9;
-    }
 </style>
 {% endblock %}
 
@@ -410,27 +403,6 @@
             </div>
         {% endif %}
 
-        {# Search Bar #}
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0">
-                        <i class="fas fa-search text-muted"></i>
-                    </span>
-                    <input type="text" class="form-control border-start-0 ps-0" id="searchInput" placeholder="Rechercher des publications..." value="{{ app.request.get('q') }}">
-                    <button class="btn btn-primary" type="button" id="searchBtn">
-                        <i class="fas fa-search me-2"></i>Rechercher
-                    </button>
-                    {% if app.request.get('q') %}
-                        <a href="{{ path('community') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-times"></i>
-                        </a>
-                    {% endif %}
-                </div>
-                <div id="searchResults" class="mt-3"></div>
-            </div>
-        </div>
-
         <!-- Filters and Sorting -->
         <div class="card mb-4">
             <div class="card-body">
@@ -462,27 +434,15 @@
         </div>
 
         {% for post in posts %}
-            <div class="post-item {{ post.moderationStatus == 'flagged' ? 'flagged-post' : '' }}" id="post-{{ post.id }}" data-post-id="{{ post.id }}">
+            <div class="post-item" id="post-{{ post.id }}" data-post-id="{{ post.id }}">
                 <div class="post-header">
                     <div class="post-avatar">{{ (authorNames[post.authorUuid] ?? 'Membre')|slice(0,1)|upper }}</div>
                     <div class="flex-grow-1">
-                        <div class="post-author">
-                            {{ authorNames[post.authorUuid] ?? ('Utilisateur ' ~ post.authorUuid|slice(0,8)) }}
-                            {% if post.moderationStatus == 'flagged' %}
-                                <span class="badge bg-warning text-dark ms-2" title="Ce post contient du contenu potentiellement inapproprié">
-                                    <i class="fas fa-flag"></i> Signalé
-                                </span>
-                            {% endif %}
-                        </div>
+                        <div class="post-author">{{ authorNames[post.authorUuid] ?? ('Utilisateur ' ~ post.authorUuid|slice(0,8)) }}</div>
                         <div class="post-meta">
                             <span>{{ post.createdAt|date('d/m/Y à H:i') }}</span>
                             <span>·</span>
                             <i class="fas fa-globe-americas"></i>
-                            {% if post.moderationStatus == 'flagged' %}
-                                <span class="text-warning small">
-                                    <i class="fas fa-exclamation-triangle"></i> Contenu sous surveillance
-                                </span>
-                            {% endif %}
                         </div>
                     </div>
                     <button class="post-menu-btn" type="button" aria-label="Options">
@@ -759,14 +719,6 @@
         element.classList.toggle('d-none');
     }
 
-    function toggleVisibility(selector) {
-        const element = document.querySelector(selector);
-        if (!element) {
-            return;
-        }
-        element.classList.toggle('d-none');
-    }
-
     function sendReaction(url, postId, type, loginUrl) {
         fetch(url, {
             method: 'POST',
@@ -854,78 +806,5 @@
         });
     }
 
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const searchResults = document.getElementById('searchResults');
-
-    if (searchBtn && searchInput) {
-        searchBtn.addEventListener('click', performSearch);
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                performSearch();
-            }
-        });
-        
-        // Real-time search as user types
-        searchInput.addEventListener('input', performSearch);
-    }
-
-    async function performSearch() {
-        const query = searchInput.value.trim();
-        const postItems = document.querySelectorAll('.post-item');
-        
-        console.log('[Search] Triggered with query:', query);
-        console.log('[Search] Found posts:', postItems.length);
-        
-        if (!query) {
-            // Clear search, show all posts
-            console.log('[Search] Clearing search, showing all posts');
-            postItems.forEach(post => {
-                post.style.display = 'block';
-            });
-            searchResults.innerHTML = '';
-            return;
-        }
-
-        searchResults.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Recherche en cours...</div>';
-
-        try {
-            const response = await fetch('/api/posts/search?query=' + encodeURIComponent(query));
-            const data = await response.json();
-            
-            console.log('[Search] API Response:', data);
-
-            // Get IDs of matching posts
-            const matchingIds = data.hits ? data.hits.map(hit => hit.id) : [];
-            console.log('[Search] Matching post IDs:', matchingIds);
-            
-            // Hide all posts first
-            postItems.forEach(post => {
-                post.style.display = 'none';
-            });
-            console.log('[Search] All posts hidden');
-            
-            // Show only matching posts
-            matchingIds.forEach(id => {
-                const post = document.getElementById('post-' + id);
-                if (post) {
-                    post.style.display = 'block';
-                    console.log('[Search] Showing post ' + id);
-                } else {
-                    console.log('[Search] Post ' + id + ' not found in DOM');
-                }
-            });
-
-            if (data.hits && data.hits.length > 0) {
-                searchResults.innerHTML = '<div class="alert alert-info"><strong>' + data.total + ' resultat(s)</strong> trouve(s) en ' + data.processing_time_ms + 'ms</div>';
-            } else {
-                searchResults.innerHTML = '<div class="alert alert-warning">Aucun resultat trouve.</div>';
-            }
-        } catch (error) {
-            console.error('[Search] Search error:', error);
-            searchResults.innerHTML = '<div class="alert alert-danger">Erreur lors de la recherche.</div>';
-        }
-    }
 </script>
 {% endblock %}
