@@ -18,9 +18,36 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ArtworkAdminController extends AbstractController
 {
     #[Route('', name: 'admin_artwork_index', methods: ['GET'])]
-    public function index(ArtworkRepository $artworkRepository, CategoryRepository $categoryRepository): Response
+    public function index(Request $request, ArtworkRepository $artworkRepository, CategoryRepository $categoryRepository): Response
     {
-        $artworks = $artworkRepository->findBy([], ['id' => 'DESC']);
+        // Récupérer les paramètres de filtrage
+        $categoryId = $request->query->getInt('category') ?: null;
+        $status = $request->query->get('status') ?: null;
+        $sort = $request->query->get('sort', 'id_desc');
+        
+        // Construire les critères de filtrage
+        $criteria = [];
+        if ($categoryId) {
+            $category = $categoryRepository->find($categoryId);
+            if ($category) {
+                $criteria['category'] = $category;
+            }
+        }
+        if ($status) {
+            $criteria['status'] = $status;
+        }
+        
+        // Déterminer l'ordre de tri
+        $orderBy = match($sort) {
+            'id_asc' => ['id' => 'ASC'],
+            'id_desc' => ['id' => 'DESC'],
+            'title_asc' => ['title' => 'ASC'],
+            'title_desc' => ['title' => 'DESC'],
+            default => ['id' => 'DESC'],
+        };
+        
+        // Récupérer les œuvres filtrées
+        $artworks = $artworkRepository->findBy($criteria, $orderBy);
         $categories = $categoryRepository->findAll();
         
         // Calculer les statistiques
@@ -34,8 +61,9 @@ class ArtworkAdminController extends AbstractController
             'artworks' => $artworks,
             'categories' => $categories,
             'stats' => $stats,
-            'categoryId' => null,
-            'status' => null,
+            'categoryId' => $categoryId,
+            'status' => $status,
+            'sort' => $sort,
         ]);
     }
 
