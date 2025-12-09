@@ -3,9 +3,6 @@ namespace App\Controller;
 
 use App\Entity\Post;
 use App\Repository\PostRepository;
-use App\Service\SearchService;
-use App\Service\ImageUploadService;
-use App\Service\ReputationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,10 +15,7 @@ class PostController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private PostRepository $postRepository,
-        private SearchService $searchService,
-        private ImageUploadService $imageUploadService,
-        private ReputationService $reputationService
+        private PostRepository $postRepository
     ) {
     }
 
@@ -62,12 +56,6 @@ class PostController extends AbstractController
         $this->em->persist($post);
         $this->em->flush();
 
-        // Award reputation for creating post
-        $this->reputationService->awardPostCreation($user->getUuid());
-
-        // Index post in Meilisearch
-        $this->searchService->indexPost($post);
-
         return $this->json(['id' => $post->getId()], 201);
     }
 
@@ -97,9 +85,6 @@ class PostController extends AbstractController
 
         $this->em->flush();
 
-        // Update post in Meilisearch index
-        $this->searchService->updatePostIndex($post);
-
         return $this->json(['id' => $post->getId(), 'message' => 'Post updated successfully']);
     }
 
@@ -117,9 +102,6 @@ class PostController extends AbstractController
         if ($post->getAuthorUuid() !== $user->getUuid() && !$this->isGranted('ROLE_ADMIN')) {
             return $this->json(['error' => 'Not authorized to delete this post'], 403);
         }
-
-        // Delete from Meilisearch index
-        $this->searchService->deletePostIndex($id);
 
         $this->em->remove($post);
         $this->em->flush();
@@ -174,7 +156,24 @@ class PostController extends AbstractController
         $limit = (int) $request->query->get('limit', 20);
         $limit = min(max($limit, 1), 100); // Between 1 and 100
 
-        $results = $this->searchService->searchPosts($query, $limit);
+        // Simple search using repository
+        $posts = $this->postRepository->createQueryBuilder('p')
+            ->where('p.content LIKE :query')
+            ->setParameter('query', '%' . $query . '%')
+            ->setMaxResults($limit)
+            ->orderBy('p.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $results = array_map(fn(Post $post) => [
+            'id' => $post->getId(),
+            'author_uuid' => $post->getAuthorUuid(),
+            'content' => $post->getContent(),
+            'image_url' => $post->getImageUrl(),
+            'created_at' => $post->getCreatedAt()->format('c'),
+            'likes_count' => $post->getLikesCount(),
+            'dislikes_count' => $post->getDislikesCount(),
+        ], $posts);
 
         return $this->json($results);
     }
@@ -200,12 +199,18 @@ class PostController extends AbstractController
         }
 
         try {
-            $imageUrl = $this->imageUploadService->uploadPostImage($file);
+            // Basic file upload handling
+            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/posts';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $filename = uniqid() . '.' . $file->guessExtension();
+            $file->move($uploadDir, $filename);
+            $imageUrl = '/uploads/posts/' . $filename;
+
             $post->setImageUrl($imageUrl);
             $this->em->flush();
-
-            // Update search index with new image
-            $this->searchService->updatePostIndex($post);
 
             return $this->json([
                 'message' => 'Image uploaded successfully',

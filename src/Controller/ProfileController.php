@@ -7,7 +7,6 @@ use App\Entity\Comment;
 use App\Entity\Post;
 use App\Entity\User;
 use App\Form\ProfileType;
-use App\Service\ImageUploadService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -28,8 +27,7 @@ class ProfileController extends AbstractController
     public function __construct(
         private EntityManagerInterface $entityManager,
         private ParameterBagInterface $parameterBag,
-        private SluggerInterface $slugger,
-        private ImageUploadService $imageUploadService
+        private SluggerInterface $slugger
     ) {
     }
 
@@ -115,7 +113,16 @@ class ProfileController extends AbstractController
         }
 
         try {
-            $avatarUrl = $this->imageUploadService->uploadAvatar($file);
+            // Basic avatar upload
+            $uploadDir = $this->parameterBag->get('app.user_avatar_directory');
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $filename = uniqid() . '.' . $file->guessExtension();
+            $file->move($uploadDir, $filename);
+            $avatarUrl = '/uploads/avatars/' . $filename;
+
             $user->setAvatarUrl($avatarUrl);
             $this->entityManager->flush();
 
