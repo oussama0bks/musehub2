@@ -65,6 +65,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->roles = ['ROLE_USER'];
         $this->isActive = true;
         $this->artworkLikes = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->catalogues = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function getId(): ?int
@@ -290,6 +291,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($artworkLike->getUser() === $this) {
                 $artworkLike->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, Catalogue>
+     */
+    public function getCatalogues(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->catalogues;
+    }
+
+    public function addCatalogue(Catalogue $catalogue): self
+    {
+        if (!$this->catalogues->contains($catalogue)) {
+            $this->catalogues->add($catalogue);
+            $catalogue->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCatalogue(Catalogue $catalogue): self
+    {
+        if ($this->catalogues->removeElement($catalogue)) {
+            // set the owning side to null (unless already changed)
+            if ($catalogue->getUser() === $this) {
+                $catalogue->setUser(null);
             }
         }
 

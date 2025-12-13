@@ -45,16 +45,28 @@ class ArtworkRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-    public function findAllWithFilters(array $filters)
+    public function findAllWithFilters(array $filters, bool $isAdmin = false)
     {
-        $qb = $this->createQueryBuilder('a')
-            ->where('a.status = :status')
-            ->setParameter('status', 'visible');
+        $qb = $this->createQueryBuilder('a');
+
+        if (!$isAdmin) {
+            $qb->where('a.status = :status')
+               ->setParameter('status', 'visible');
+        } elseif (!empty($filters['status'])) {
+            $qb->andWhere('a.status = :status')
+               ->setParameter('status', $filters['status']);
+        }
 
         if (!empty($filters['category'])) {
-            $qb->join('a.category', 'c')
-               ->andWhere('c.name = :category')
-               ->setParameter('category', $filters['category']);
+            // Check if filtered by ID (for admin) or Name (for front)
+            if (is_numeric($filters['category'])) {
+                 $qb->andWhere('a.category = :category')
+                    ->setParameter('category', $filters['category']);
+            } else {
+                $qb->join('a.category', 'c')
+                   ->andWhere('c.name = :category')
+                   ->setParameter('category', $filters['category']);
+            }
         }
 
         if (!empty($filters['min_price'])) {
@@ -79,6 +91,13 @@ class ArtworkRepository extends ServiceEntityRepository
                 break;
             case 'likes':
                 $qb->orderBy('a.likesCount', $direction);
+                break;
+            case 'category':
+                $qb->leftJoin('a.category', 'cat')
+                   ->orderBy('cat.name', $direction);
+                break;
+            case 'title':
+                $qb->orderBy('a.title', $direction);
                 break;
             case 'newest':
             default:

@@ -41,6 +41,9 @@ class Artwork
     #[ORM\OneToMany(mappedBy: 'artwork', targetEntity: ArtworkLike::class, orphanRemoval: true)]
     private $likes;
 
+    #[ORM\ManyToOne(inversedBy: 'artworks')]
+    private ?Catalogue $catalogue = null;
+
     public function __construct()
     {
         $this->likes = new \Doctrine\Common\Collections\ArrayCollection();
@@ -178,6 +181,17 @@ class Artwork
     public function setCategory(?Category $category): self
     {
         $this->category = $category;
+        return $this;
+    }
+
+    public function getCatalogue(): ?Catalogue
+    {
+        return $this->catalogue;
+    }
+
+    public function setCatalogue(?Catalogue $catalogue): self
+    {
+        $this->catalogue = $catalogue;
         return $this;
     }
 }

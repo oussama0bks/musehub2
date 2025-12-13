@@ -3,6 +3,12 @@
 {% block title %}Administration des œuvres{% endblock %}
 
 {% block body %}
+{% set filters = filters|default({
+    'category': '',
+    'status': '',
+    'sort': '',
+    'direction': 'DESC'
+}) %}
 <div class="mb-4">
     <div class="d-flex justify-content-between align-items-center">
         <div>
@@ -59,42 +65,111 @@
 {% endif %}
 
 <!-- Filtres -->
-<div class="card mb-4" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <div class="card-body">
-        <form method="GET" class="d-flex gap-3">
-            <select name="category" class="form-select" style="max-width: 200px;">
-                <option value="">Toutes les catégories</option>
-                {% if categories is defined %}
-                    {% for category in categories %}
-                        <option value="{{ category.id }}" {% if categoryId is defined and categoryId == category.id %}selected{% endif %}>
-                            {{ category.name }}
-                        </option>
-                    {% endfor %}
-                {% endif %}
-            </select>
-            <select name="status" class="form-select" style="max-width: 200px;">
-                <option value="">Tous les statuts</option>
-                <option value="visible" {% if status is defined and status == 'visible' %}selected{% endif %}>Visible</option>
-                <option value="hidden" {% if status is defined and status == 'hidden' %}selected{% endif %}>Caché</option>
-            </select>
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-            <a href="{{ path('admin_artworks_list') }}" class="btn btn-outline-secondary">Réinitialiser</a>
-        </form>
+<nav class="navbar navbar-expand-lg navbar-light bg-white rounded shadow-sm mb-4 p-3">
+    <div class="container-fluid px-0">
+        <span class="navbar-brand fs-6 fw-bold text-primary"><i class="fas fa-filter me-2"></i>Filtres</span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#filterNavbar" aria-controls="filterNavbar" aria-expanded="false" aria-label="Toggle filters">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="filterNavbar">
+            <form method="GET" class="d-flex flex-wrap gap-3 w-100 align-items-center">
+                <input type="hidden" name="sort" value="{{ filters.sort }}">
+                <input type="hidden" name="direction" value="{{ filters.direction }}">
+                
+                <div class="d-flex align-items-center">
+                    <label class="me-2 text-muted small">Catégorie:</label>
+                    <select name="category" class="form-select form-select-sm" style="min-width: 150px;">
+                        <option value="">Toutes</option>
+                        {% if categories is defined %}
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if categoryId is defined and categoryId == category.id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <label class="me-2 text-muted small">Statut:</label>
+                    <select name="status" class="form-select form-select-sm" style="min-width: 150px;">
+                        <option value="">Tous</option>
+                        <option value="visible" {% if status is defined and status == 'visible' %}selected{% endif %}>Visible</option>
+                        <option value="hidden" {% if status is defined and status == 'hidden' %}selected{% endif %}>Caché</option>
+                    </select>
+                </div>
+
+                <div class="ms-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-primary px-3">
+                        <i class="fas fa-check me-1"></i>Appliquer
+                    </button>
+                    <a href="{{ path('admin_artworks_list') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-undo me-1"></i>Reset
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
+</nav>
 
 <!-- Liste des œuvres -->
 <div class="card" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover align-middle">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Titre</th>
+                        <th>
+                            <a href="{{ path('admin_artworks_list', {'category': filters.category, 'status': filters.status, 'sort': 'newest', 'direction': filters.sort == 'newest' and filters.direction == 'DESC' ? 'ASC' : 'DESC'}) }}" class="text-decoration-none text-dark">
+                                ID 
+                                {% if filters.sort == 'newest' %}
+                                    <i class="fas fa-sort-{{ filters.direction|lower }} small text-primary"></i>
+                                {% else %}
+                                    <i class="fas fa-sort small text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ path('admin_artworks_list', {'category': filters.category, 'status': filters.status, 'sort': 'title', 'direction': filters.sort == 'title' and filters.direction == 'ASC' ? 'DESC' : 'ASC'}) }}" class="text-decoration-none text-dark">
+                                Titre 
+                                {% if filters.sort == 'title' %}
+                                    <i class="fas fa-sort-{{ filters.direction|lower }} small text-primary"></i>
+                                {% else %}
+                                    <i class="fas fa-sort small text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
                         <th>Artiste UUID</th>
-                        <th>Catégorie</th>
-                        <th>Prix</th>
+                        <th>
+                            <a href="{{ path('admin_artworks_list', {'category': filters.category, 'status': filters.status, 'sort': 'category', 'direction': filters.sort == 'category' and filters.direction == 'ASC' ? 'DESC' : 'ASC'}) }}" class="text-decoration-none text-dark">
+                                Catégorie 
+                                {% if filters.sort == 'category' %}
+                                    <i class="fas fa-sort-{{ filters.direction|lower }} small text-primary"></i>
+                                {% else %}
+                                    <i class="fas fa-sort small text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ path('admin_artworks_list', {'category': filters.category, 'status': filters.status, 'sort': 'price', 'direction': filters.sort == 'price' and filters.direction == 'ASC' ? 'DESC' : 'ASC'}) }}" class="text-decoration-none text-dark">
+                                Prix 
+                                {% if filters.sort == 'price' %}
+                                    <i class="fas fa-sort-{{ filters.direction|lower }} small text-primary"></i>
+                                {% else %}
+                                    <i class="fas fa-sort small text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ path('admin_artworks_list', {'category': filters.category, 'status': filters.status, 'sort': 'likes', 'direction': filters.sort == 'likes' and filters.direction == 'DESC' ? 'ASC' : 'DESC'}) }}" class="text-decoration-none text-dark">
+                                Likes 
+                                {% if filters.sort == 'likes' %}
+                                    <i class="fas fa-sort-{{ filters.direction|lower }} small text-primary"></i>
+                                {% else %}
+                                    <i class="fas fa-sort small text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -103,36 +178,49 @@
                     {% for artwork in artworks %}
                     <tr>
                         <td>{{ artwork.id }}</td>
-                        <td><strong>{{ artwork.title }}</strong></td>
-                        <td><code>{{ artwork.artistUuid|slice(0, 8) }}...</code></td>
+                        <td>
+                            {% if artwork.imageUrl %}
+                                <img src="{{ artwork.imageUrl }}" alt="" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                            {% endif %}
+                            <strong>{{ artwork.title }}</strong>
+                        </td>
+                        <td><small class="text-muted">{{ artwork.artistUuid|slice(0, 8) }}...</small></td>
                         <td>
                             {% if artwork.category %}
-                                <span class="badge bg-info">{{ artwork.category.name }}</span>
+                                <span class="badge bg-info bg-opacity-10 text-info">{{ artwork.category.name }}</span>
                             {% else %}
                                 <span class="text-muted">—</span>
                             {% endif %}
                         </td>
                         <td>{{ artwork.price ? artwork.price ~ ' €' : '—' }}</td>
                         <td>
+                            <span class="badge bg-light text-dark">
+                                <i class="fas fa-heart text-danger me-1"></i> {{ artwork.likesCount }}
+                            </span>
+                        </td>
+                        <td>
                             <span class="badge bg-{{ artwork.status == 'visible' ? 'success' : 'secondary' }}">
                                 {{ artwork.status }}
                             </span>
                         </td>
                         <td>
-                            <a href="{{ path('admin_artwork_edit', {id: artwork.id}) }}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-edit me-1"></i>Modifier
+                            <button type="button" class="btn btn-sm btn-outline-warning check-stolen-btn me-1" data-id="{{ artwork.id }}" title="Vérifier si volé">
+                                <i class="fas fa-search-location"></i>
+                            </button>
+                            <a href="{{ path('admin_artwork_edit', {id: artwork.id}) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i>
                             </a>
                             <form action="{{ path('admin_artwork_delete', {id: artwork.id}) }}" method="post" style="display:inline">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_artwork_' ~ artwork.id) }}">
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer cette œuvre ?');">
-                                    <i class="fas fa-trash me-1"></i>Supprimer
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer cette œuvre ?');">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </form>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" class="text-center py-4">
+                        <td colspan="8" class="text-center py-4">
                             <i class="fas fa-paint-brush fa-2x text-muted mb-2"></i>
                             <p class="text-muted">Aucune œuvre trouvée</p>
                         </td>
@@ -143,5 +231,103 @@
         </div>
     </div>
 </div>
+</div>
+
+<!-- Modal Stolen Check -->
+<div class="modal fade" id="stolenCheckModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Vérification Antivol</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Content loaded via JS -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkButtons = document.querySelectorAll('.check-stolen-btn');
+    const modalElement = document.getElementById('stolenCheckModal');
+    const modalTitle = modalElement.querySelector('.modal-title');
+    const modalBody = modalElement.querySelector('.modal-body');
+    const modal = new bootstrap.Modal(modalElement);
+
+    checkButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const artworkId = this.dataset.id;
+            
+            modalTitle.textContent = 'Vérification en cours...';
+            modalBody.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Consultation de la base Harvard...</p></div>';
+            modal.show();
+
+            fetch(`/admin/artworks/${artworkId}/check-stolen`)
+                .then(response => response.json())
+                .then(data => {
+                    modalTitle.textContent = `Résultats pour "${data.title}"`;
+                    
+                    if (data.matches && data.matches.length > 0) {
+                        let html = '<div class="alert alert-warning">Correspondances trouvées dans la base Harvard :</div>';
+                        html += '<div class="list-group">';
+                        
+                        data.matches.forEach(match => {
+                            const imageUrl = match.primaryimageurl || (match.images && match.images[0] ? match.images[0].baseimageurl : null);
+                            html += `
+                                <div class="list-group-item d-flex align-items-center">
+                                    ${imageUrl ? `<img src="${imageUrl}" style="width: 60px; height: 60px; object-fit: cover; margin-right: 15px;">` : ''}
+                                    <div>
+                                        <h6 class="mb-1">${match.title}</h6>
+                                        <small class="text-muted">${match.dated || 'Date inconnue'} - ${match.people ? match.people[0].name : 'Artiste inconnu'}</small>
+                                        <br>
+                                        <a href="${match.url}" target="_blank" class="btn btn-sm btn-link p-0">Voir sur Harvard Art Museums</a>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        
+                        // TinEye Button
+                        html += `
+                            <div class="mt-3 text-end border-top pt-3">
+                                <small class="text-muted me-2">Vérification approfondie :</small>
+                                <a href="https://tineye.com/" target="_blank" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-search me-1"></i>Vérifier l'image sur TinEye
+                                </a>
+                            </div>
+                        `;
+                        
+                        modalBody.innerHTML = html;
+                    } else {
+                        let html = '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>Aucune correspondance directe trouvée.</div>';
+                        
+                        // TinEye Button even with no matches
+                        html += `
+                            <div class="mt-3 text-end border-top pt-3">
+                                <small class="text-muted me-2">Vérification approfondie :</small>
+                                <a href="https://tineye.com/" target="_blank" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-search me-1"></i>Vérifier l'image sur TinEye
+                                </a>
+                            </div>
+                        `;
+                        modalBody.innerHTML = html;
+                    }
+                })
+                .catch(error => {
+                    modalBody.innerHTML = `<div class="alert alert-danger">Erreur: ${error.message}</div>`;
+                });
+        });
+    });
+});
+</script>
+{% endblock %}
+
+
 

@@ -29,4 +29,20 @@ class HarvardArtService
 
         return $response->toArray();
     }
+
+    public function searchArtworks(string $title): array
+    {
+        $response = $this->httpClient->request('GET', self::BASE_URL . '/object', [
+            'query' => [
+                'apikey' => $this->apiKey,
+                'title' => $title,
+                'hasimage' => 1,
+                'size' => 5, // Limit to top 5 matches
+                'sort' => 'rank',
+                'sortorder' => 'desc',
+            ]
+        ]);
+
+        return $response->toArray();
+    }
 }

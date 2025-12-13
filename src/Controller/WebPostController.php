@@ -10,11 +10,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+use App\Message\ContentReviewMessage;
+use Symfony\Component\Messenger\MessageBusInterface;
+
 class WebPostController extends AbstractController
 {
     #[Route('/posts', name: 'post_index', methods: ['GET', 'POST'])]
     #[Route('/community/posts', name: 'community_posts', methods: ['GET', 'POST'])]
-    public function index(Request $request, EntityManagerInterface $em, PostRepository $postRepo): Response
+    public function index(Request $request, EntityManagerInterface $em, PostRepository $postRepo, MessageBusInterface $bus): Response
     {
         if ($request->isMethod('POST')) {
             $authorUuid = $request->request->get('author_uuid');
@@ -29,6 +32,9 @@ class WebPostController extends AbstractController
 
                 $em->persist($post);
                 $em->flush();
+
+                // Dispatch Messenger Async Task
+                $bus->dispatch(new ContentReviewMessage($post->getId()));
 
                 return $this->redirectToRoute('post_index');
             }
