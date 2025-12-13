@@ -1,0 +1,81 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Mes Messages - MuseHub{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0"><i class="fas fa-envelope me-2"></i>Mes Messages</h2>
+                {% if not is_granted('ROLE_ADMIN') %}
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#contactAdminModal">
+                        <i class="fas fa-headset me-2"></i>Contacter le Support
+                    </button>
+                {% endif %}
+            </div>
+            
+            <div class="card shadow-sm border-0">
+                <div class="list-group list-group-flush">
+                    {% for message in conversations %}
+                        {% set otherUser = (message.sender == app.user) ? message.recipient : message.sender %}
+                        <a href="{{ path('app_message_show', {id: otherUser.id}) }}" class="list-group-item list-group-item-action p-3 transition-hover {{ (message.recipient == app.user and not message.isRead) ? 'bg-light fw-bold' : '' }}">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                                        {{ otherUser.email|first|upper }}
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">{{ otherUser.firstname ? otherUser.firstname ~ ' ' ~ otherUser.lastname : otherUser.email }}</h5>
+                                        <p class="mb-0 text-muted small text-truncate" style="max-width: 300px;">
+                                            {% if message.sender == app.user %}
+                                                <i class="fas fa-reply me-1"></i>
+                                            {% endif %}
+                                            {{ message.content }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted d-block">{{ message.createdAt|date('d/m H:i') }}</small>
+                                    {% if message.recipient == app.user and not message.isRead %}
+                                        <span class="badge bg-danger rounded-pill mt-1">Nouveau</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    {% else %}
+                        <div class="text-center p-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Vous n'avez aucun message.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Contact Admin Modal -->
+    <div class="modal fade" id="contactAdminModal" tabindex="-1" aria-labelledby="contactAdminModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contactAdminModalLabel">Contacter l'Administration</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ path('app_message_send_admin') }}" method="POST">
+                        <div class="mb-3">
+                            <label for="messageContent" class="form-label">Votre message</label>
+                            <textarea class="form-control" id="messageContent" name="content" rows="4" required placeholder="Bonjour, j'ai une question..."></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Envoyer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

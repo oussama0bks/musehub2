@@ -4,6 +4,12 @@
 
 {% block body %}
 <div class="container my-5">
+    <div class="mb-4">
+        <a href="{{ path('home') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour à l'accueil
+        </a>
+    </div>
+
     <div class="text-center mb-5">
         <h1 class="display-4 fw-bold mb-3">Galerie d'Œuvres</h1>
         <p class="lead text-muted">Découvrez notre collection d'œuvres d'art</p>
@@ -34,7 +40,7 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">
-                            <i class="fas fa-upload me-2"></i>Image de l'œuvre (depuis votre PC)
+                            <i class="fas fa-upload me-2"></i>Image de l'œuvre (depuis votre PC) <span class="text-danger">*</span>
                         </label>
                         <input type="file" class="form-control" name="image_file" accept="image/*" id="image_file_input">
                         <small class="form-text text-muted">Formats acceptés: JPG, PNG, GIF, WEBP (max 5MB)</small>
@@ -43,8 +49,8 @@
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Catégorie</label>
-                        <select class="form-select" name="category_id">
+                        <label class="form-label">Catégorie <span class="text-danger">*</span></label>
+                        <select class="form-select" name="category_id" required>
                             <option value="">Aucune catégorie</option>
                             {% for category in categories %}
                                 <option value="{{ category.id }}">{{ category.name }}</option>

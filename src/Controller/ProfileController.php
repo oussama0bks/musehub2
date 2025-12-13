@@ -28,7 +28,8 @@ class ProfileController extends AbstractController
         private EntityManagerInterface $entityManager,
         private ParameterBagInterface $parameterBag,
         private SluggerInterface $slugger,
-        private UserPasswordHasherInterface $passwordHasher
+        private UserPasswordHasherInterface $passwordHasher,
+        private \App\Service\UserService $userService
     ) {
     }
 
@@ -95,7 +96,7 @@ class ProfileController extends AbstractController
                 $user->setPassword($this->passwordHasher->hashPassword($user, $plainPassword));
             }
 
-            $this->entityManager->flush();
+            $this->userService->updateUserProfile($user);
             $this->addFlash('success', 'Votre profil a été mis à jour.');
 
             return $this->redirectToRoute('user_profile');

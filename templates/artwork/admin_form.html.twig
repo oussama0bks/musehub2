@@ -54,9 +54,9 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="image_file" class="form-label fw-bold">
-                        <i class="fas fa-upload me-2 text-primary"></i>Image de l'œuvre
+                        <i class="fas fa-upload me-2 text-primary"></i>Image de l'œuvre <span class="text-danger">*</span>
                     </label>
-                    <input type="file" class="form-control" id="image_file" name="image_file" accept="image/*">
+                    <input type="file" class="form-control" id="image_file" name="image_file" accept="image/*" {% if not artwork %}required{% endif %}>
                     <small class="form-text text-muted">Formats acceptés: JPG, PNG, GIF, WEBP (max 5MB)</small>
                     {% if artwork and artwork.imageUrl %}
                         <div class="mt-2">
@@ -98,10 +98,10 @@
 
             <div class="mb-4">
                 <label for="category_id" class="form-label fw-bold">
-                    <i class="fas fa-tags me-2 text-primary"></i>Catégorie
+                    <i class="fas fa-tags me-2 text-primary"></i>Catégorie <span class="text-danger">*</span>
                 </label>
-                <select class="form-select" id="category_id" name="category_id">
-                    <option value="">Aucune catégorie</option>
+                <select class="form-select" id="category_id" name="category_id" required>
+                    <option value="">Sélectionnez une catégorie</option>
                     {% for category in categories %}
                         <option value="{{ category.id }}" {% if artwork and artwork.category and artwork.category.id == category.id %}selected{% endif %}>
                             {{ category.name }}

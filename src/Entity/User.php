@@ -264,6 +264,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Catalogue::class, orphanRemoval: true)]
+    private \Doctrine\Common\Collections\Collection $catalogues;
+
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: ArtworkLike::class, orphanRemoval: true)]
     private $artworkLikes;
 

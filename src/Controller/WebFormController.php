@@ -58,10 +58,19 @@ class WebFormController extends AbstractController
         $artwork->setDescription($request->request->get('description') ?: null);
         
         // Handle file upload
-        $imageUrl = null;
+        // Validate Image (Mandatory)
         $uploadedFile = $request->files->get('image_file');
+        $imageUrlParam = $request->request->get('image_url');
+
+        if ((!$uploadedFile || !$uploadedFile->isValid()) && !$imageUrlParam) {
+            $this->addFlash('error', 'L\'image est obligatoire (fichier ou URL).');
+            return $this->redirectToRoute('artworks');
+        }
+
+        $imageUrl = null;
         
         if ($uploadedFile && $uploadedFile->isValid()) {
+            // ... (existing upload logic) ...
             // Validate file type
             $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (!in_array($uploadedFile->getMimeType(), $allowedMimeTypes)) {
@@ -93,9 +102,9 @@ class WebFormController extends AbstractController
                 $this->addFlash('error', 'Erreur lors de l\'upload de l\'image: ' . $e->getMessage());
                 return $this->redirectToRoute('artworks');
             }
-        } elseif ($request->request->get('image_url')) {
+        } elseif ($imageUrlParam) {
             // Use URL if provided and no file uploaded
-            $imageUrl = $request->request->get('image_url');
+            $imageUrl = $imageUrlParam;
         }
         
         $artwork->setImageUrl($imageUrl);
@@ -105,13 +114,14 @@ class WebFormController extends AbstractController
         $artwork->setStatus($request->request->get('status') ?: 'visible');
 
         $categoryId = $request->request->get('category_id');
-        if ($categoryId && $categoryId !== '') {
-            $category = $this->categoryRepository->find((int)$categoryId);
-            if ($category) {
-                $artwork->setCategory($category);
-            }
-        } else {
-            $artwork->setCategory(null);
+        if (!$categoryId || $categoryId === '') {
+             $this->addFlash('error', 'La catégorie est obligatoire.');
+             return $this->redirectToRoute('artworks');
+        }
+        
+        $category = $this->categoryRepository->find((int)$categoryId);
+        if ($category) {
+            $artwork->setCategory($category);
         }
 
         $this->em->persist($artwork);

@@ -1,0 +1,126 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Statistiques Globales - MuseHub Admin{% endblock %}
+
+{% block body %}
+<div class="mb-4">
+    <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-secondary mb-3">
+        <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+    </a>
+    <h1 class="h3 mb-0">Statistiques Globales</h1>
+    <p class="text-muted">Vue détaillée de l'activité de la plateforme</p>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card bg-primary text-white h-100" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="card-title mb-0">Utilisateurs</h6>
+                        <h2 class="mt-2 mb-0">{{ stats.users }}</h2>
+                    </div>
+                    <i class="fas fa-users fa-2x opacity-50"></i>
+                </div>
+                <small class="opacity-75">dont {{ stats.artists }} artistes</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card bg-success text-white h-100" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="card-title mb-0">Œuvres</h6>
+                        <h2 class="mt-2 mb-0">{{ stats.artworks.total }}</h2>
+                    </div>
+                    <i class="fas fa-paint-brush fa-2x opacity-50"></i>
+                </div>
+                <small class="opacity-75">{{ stats.artworks.visible }} visibles</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card bg-info text-white h-100" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="card-title mb-0">Événements</h6>
+                        <h2 class="mt-2 mb-0">{{ stats.events }}</h2>
+                    </div>
+                    <i class="fas fa-calendar-alt fa-2x opacity-50"></i>
+                </div>
+                <small class="opacity-75">Actifs et passés</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card bg-warning text-white h-100" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="card-title mb-0">Revenus</h6>
+                        <h2 class="mt-2 mb-0">{{ stats.revenue|number_format(2, ',', ' ') }} €</h2>
+                    </div>
+                    <i class="fas fa-euro-sign fa-2x opacity-50"></i>
+                </div>
+                <small class="opacity-75">Total cumulé</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Sections -->
+<div class="row g-4">
+    <!-- Marketplace Stats -->
+    <div class="col-md-6">
+        <div class="card h-100" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                <h5 class="mb-0"><i class="fas fa-shopping-cart me-2 text-primary"></i>Activité Marketplace</h5>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle bg-light p-3">
+                            <i class="fas fa-tag text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0">Annonces actives</h6>
+                        <p class="text-muted small mb-0">{{ stats.listings }} annonces répertoriées</p>
+                    </div>
+                    <div class="text-end">
+                        <h4 class="mb-0 text-dark">{{ stats.listings }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Stats -->
+    <div class="col-md-6">
+        <div class="card h-100" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                <h5 class="mb-0"><i class="fas fa-comments me-2 text-primary"></i>Activité Communautaire</h5>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle bg-light p-3">
+                            <i class="fas fa-pen-nib text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0">Publications</h6>
+                        <p class="text-muted small mb-0">Posts créés par les utilisateurs</p>
+                    </div>
+                    <div class="text-end">
+                        <h4 class="mb-0 text-dark">{{ stats.posts }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

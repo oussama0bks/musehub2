@@ -118,8 +118,14 @@ class FrontOfficeController extends AbstractController
             throw $this->createNotFoundException('Œuvre introuvable');
         }
 
+        $artist = null;
+        if ($artwork->getArtistUuid()) {
+            $artist = $this->userRepository->findOneBy(['uuid' => $artwork->getArtistUuid()]);
+        }
+
         return $this->render('front/artwork_show.html.twig', [
             'artwork' => $artwork,
+            'artist' => $artist,
         ]);
     }
 

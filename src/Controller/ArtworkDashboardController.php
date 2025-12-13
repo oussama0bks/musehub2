@@ -98,6 +98,26 @@ class ArtworkDashboardController extends AbstractController
                 $artwork->setArtistUuid($artistUuid);
                 $artwork->setDescription($request->request->get('description') ?: null);
                 
+                // Validation: Image is mandatory on creation
+                if (!$request->files->get('image_file') && !$request->request->get('image_url')) {
+                    $this->addFlash('error', 'L\'image est obligatoire pour une nouvelle œuvre.');
+                    return $this->redirectToRoute('admin_artwork_new');
+                }
+
+                // Validation: Price must be positive
+                $price = $request->request->get('price');
+                if ($price !== null && $price < 0) {
+                    $this->addFlash('error', 'Le prix ne peut pas être négatif.');
+                    return $this->redirectToRoute('admin_artwork_new');
+                }
+
+                // Validation: Category is mandatory
+                $categoryId = $request->request->getInt('category_id');
+                if (!$categoryId) {
+                     $this->addFlash('error', 'La catégorie est obligatoire.');
+                     return $this->redirectToRoute('admin_artwork_new');
+                }
+
                 $imageUrl = null;
                 $uploadedFile = $request->files->get('image_file');
                 
@@ -134,15 +154,16 @@ class ArtworkDashboardController extends AbstractController
                 }
                 
                 $artwork->setImageUrl($imageUrl);
-                $artwork->setPrice($request->request->get('price') ?: null);
+                $artwork->setPrice($price ?: null);
                 $artwork->setStatus($request->request->get('status') ?: 'visible');
 
-                $categoryId = $request->request->getInt('category_id') ?: null;
-                if ($categoryId) {
-                    $category = $this->categoryRepository->find($categoryId);
-                    if ($category) {
-                        $artwork->setCategory($category);
-                    }
+                // Category processing (Already validated presence)
+                $category = $this->categoryRepository->find($categoryId);
+                if ($category) {
+                    $artwork->setCategory($category);
+                } else {
+                     $this->addFlash('error', 'Catégorie invalide.');
+                     return $this->redirectToRoute('admin_artwork_new');
                 }
 
                 $this->em->persist($artwork);
@@ -207,6 +228,20 @@ class ArtworkDashboardController extends AbstractController
                 $artwork->setArtistUuid($artistUuid);
                 $artwork->setDescription($request->request->get('description') ?: null);
                 
+                // Validation: Price must be positive
+                $price = $request->request->get('price');
+                if ($price !== null && $price < 0) {
+                    $this->addFlash('error', 'Le prix ne peut pas être négatif.');
+                    return $this->redirectToRoute('admin_artwork_edit', ['id' => $id]);
+                }
+
+                // Validation: Category is mandatory
+                $categoryId = $request->request->getInt('category_id');
+                if (!$categoryId) {
+                     $this->addFlash('error', 'La catégorie est obligatoire.');
+                     return $this->redirectToRoute('admin_artwork_edit', ['id' => $id]);
+                }
+
                 $uploadedFile = $request->files->get('image_file');
                 
                 if ($uploadedFile && $uploadedFile->isValid()) {
@@ -249,17 +284,16 @@ class ArtworkDashboardController extends AbstractController
                     $artwork->setImageUrl($request->request->get('image_url'));
                 }
                 
-                $artwork->setPrice($request->request->get('price') ?: null);
+                $artwork->setPrice($price ?: null);
                 $artwork->setStatus($request->request->get('status') ?: 'visible');
 
-                $categoryId = $request->request->getInt('category_id') ?: null;
-                if ($categoryId) {
-                    $category = $this->categoryRepository->find($categoryId);
-                    if ($category) {
-                        $artwork->setCategory($category);
-                    }
+                // Category processing (Already validated presence)
+                $category = $this->categoryRepository->find($categoryId);
+                if ($category) {
+                    $artwork->setCategory($category);
                 } else {
-                    $artwork->setCategory(null);
+                     $this->addFlash('error', 'Catégorie invalide.');
+                     return $this->redirectToRoute('admin_artwork_edit', ['id' => $id]);
                 }
 
                 $this->em->flush();
