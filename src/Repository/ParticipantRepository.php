@@ -17,9 +17,8 @@ class ParticipantRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->where('p.eventUuid = :eventUuid')
-            ->andWhere('p.status = :status')
             ->setParameter('eventUuid', $eventUuid)
-            ->setParameter('status', 'confirmed')
+            ->orderBy('p.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
     }

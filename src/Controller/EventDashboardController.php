@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Repository\EventRepository;
 use App\Repository\EventTypeRepository;
 use App\Repository\ParticipantRepository;
+use App\Service\ParticipantNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,13 +22,37 @@ class EventDashboardController extends AbstractController
         private EventRepository $eventRepository,
         private EventTypeRepository $eventTypeRepository,
         private ParticipantRepository $participantRepository,
-        private EntityManagerInterface $em
+        private EntityManagerInterface $em,
+        private ParticipantNotificationService $notificationService
     ) {
+    }
+
+    private function deactivatePastEvents(): void
+    {
+        $now = new \DateTimeImmutable();
+        $pastEvents = $this->eventRepository->createQueryBuilder('e')
+            ->where('e.dateTime < :now')
+            ->andWhere('e.isActive = :active')
+            ->setParameter('now', $now)
+            ->setParameter('active', true)
+            ->getQuery()
+            ->getResult();
+
+        foreach ($pastEvents as $event) {
+            $event->setIsActive(false);
+        }
+
+        if (count($pastEvents) > 0) {
+            $this->em->flush();
+        }
     }
 
     #[Route('', name: 'admin_events_list', methods: ['GET'])]
     public function list(Request $request): Response
     {
+        // Désactiver automatiquement les événements passés
+        $this->deactivatePastEvents();
+        
         $statusFilter = $request->query->get('status', 'all');
         $search = trim((string)$request->query->get('q', ''));
         $sortBy = $request->query->get('sort', 'date_desc'); // Nouveau paramètre de tri
@@ -258,10 +283,80 @@ class EventDashboardController extends AbstractController
         }
 
         $participants = $this->participantRepository->findByEventUuid($event->getUuid());
+        
+        // Récupérer les noms des utilisateurs
+        $participantsWithNames = [];
+        $userRepository = $this->em->getRepository(\App\Entity\User::class);
+        
+        foreach ($participants as $participant) {
+            $user = $userRepository->findOneBy(['uuid' => $participant->getParticipantUuid()]);
+            $participantsWithNames[] = [
+                'participant' => $participant,
+                'userName' => $user ? $user->getUsername() : 'Utilisateur inconnu',
+                'userEmail' => $user ? $user->getEmail() : null,
+            ];
+        }
 
         return $this->render('event/admin_participants.html.twig', [
             'event' => $event,
-            'participants' => $participants,
+            'participantsWithNames' => $participantsWithNames,
+        ]);
+    }
+
+    #[Route('/{eventId}/participants/{participantId}/status', name: 'admin_events_participant_status', methods: ['POST'])]
+    public function updateParticipantStatus(int $eventId, int $participantId, Request $request): Response
+    {
+        $participant = $this->participantRepository->find($participantId);
+        if (!$participant) {
+            return $this->json(['error' => 'Participant not found'], 404);
+        }
+
+        $event = $this->eventRepository->find($eventId);
+        if (!$event) {
+            return $this->json(['error' => 'Event not found'], 404);
+        }
+
+        $newStatus = $request->request->get('status');
+        error_log("========= updateParticipantStatus CALLED =========");
+        error_log("Event ID: $eventId, Participant ID: $participantId, New Status: $newStatus");
+        
+        if (!in_array($newStatus, ['confirmed', 'pending', 'rejected'])) {
+            return $this->json(['error' => 'Invalid status'], 400);
+        }
+
+        // Sauvegarder l'ancien statut pour comparaison
+        $oldStatus = $participant->getStatus();
+        error_log("Old Status: $oldStatus");
+        
+        $participant->setStatus($newStatus);
+        $this->em->flush();
+
+        // Envoyer l'email de notification si le statut a changé
+        $emailSent = false;
+        if ($oldStatus !== $newStatus) {
+            $userRepository = $this->em->getRepository(\App\Entity\User::class);
+            $user = $userRepository->findOneBy(['uuid' => $participant->getParticipantUuid()]);
+            
+            if ($user) {
+                try {
+                    $this->notificationService->sendStatusChangeEmail($participant, $event, $user, $newStatus);
+                    $emailSent = true;
+                } catch (\Exception $e) {
+                    // Log l'erreur mais continue
+                    error_log('Erreur envoi email: ' . $e->getMessage());
+                }
+            } else {
+                error_log('Utilisateur non trouvé pour UUID: ' . $participant->getParticipantUuid());
+            }
+        } else {
+            error_log('Statut inchangé: ' . $oldStatus . ' === ' . $newStatus);
+        }
+
+        return $this->json([
+            'success' => true, 
+            'status' => $newStatus,
+            'message' => $emailSent ? 'Statut mis à jour et email envoyé' : 'Statut mis à jour (email non envoyé)',
+            'emailSent' => $emailSent
         ]);
     }
 }

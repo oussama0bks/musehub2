@@ -21,7 +21,7 @@ class Participant
     private string $participantUuid;
 
     #[ORM\Column(length: 20)]
-    private string $status = 'confirmed'; // 'confirmed' or 'cancelled'
+    private string $status = 'pending'; // 'pending', 'confirmed', 'rejected'
 
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;

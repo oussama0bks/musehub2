@@ -352,12 +352,15 @@ class EventApiController extends AbstractController
         $participant = new Participant();
         $participant->setEventUuid($event->getUuid());
         $participant->setParticipantUuid($user->getUuid());
-        $participant->setStatus('confirmed');
+        // Le statut par défaut est 'pending' - sera confirmé par l'admin
 
         $this->em->persist($participant);
         $this->em->flush();
 
-        return new JsonResponse(['message' => 'Successfully joined event'], Response::HTTP_CREATED);
+        return new JsonResponse([
+            'message' => 'Inscription enregistrée. En attente de confirmation par l\'organisateur.',
+            'status' => 'pending'
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/{id}/leave', name: 'api_events_leave', methods: ['DELETE'])]

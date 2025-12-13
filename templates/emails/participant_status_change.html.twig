@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9fafb;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .status-confirmed {
+            background: #10b981;
+            color: white;
+        }
+        .status-rejected {
+            background: #ef4444;
+            color: white;
+        }
+        .status-pending {
+            background: #f59e0b;
+            color: white;
+        }
+        .event-details {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+        .event-details h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .detail-row {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+        .detail-row strong {
+            min-width: 120px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ statusEmoji }} MuseHub - Mise à jour d'inscription</h1>
+    </div>
+    
+    <div class="content">
+        <p>Bonjour <strong>{{ user.username }}</strong>,</p>
+        
+        <p>Nous vous informons que votre inscription à l'événement suivant a été mise à jour :</p>
+        
+        <div class="event-details">
+            <h3>{{ event.title }}</h3>
+            
+            <div class="detail-row">
+                <strong>📅 Date :</strong>
+                <span>{{ event.dateTime|date('d/m/Y à H:i') }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <strong>📍 Lieu :</strong>
+                <span>{{ event.location == 'online' ? 'En ligne' : 'Sur place' }}</span>
+            </div>
+            
+            {% if event.eventType %}
+            <div class="detail-row">
+                <strong>🏷️ Type :</strong>
+                <span>{{ event.eventType.name }}</span>
+            </div>
+            {% endif %}
+            
+            {% if event.description %}
+            <div class="detail-row">
+                <strong>📝 Description :</strong>
+                <span>{{ event.description|slice(0, 200) }}{% if event.description|length > 200 %}...{% endif %}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <p>Votre statut d'inscription :</p>
+        <div class="status-badge status-{{ status }}">
+            {{ statusEmoji }} {{ statusLabel|upper }}
+        </div>
+        
+        {% if status == 'confirmed' %}
+        <p>🎉 <strong>Félicitations !</strong> Votre inscription a été confirmée. Nous avons hâte de vous voir à cet événement !</p>
+        
+        <p>N'oubliez pas d'ajouter cet événement à votre calendrier :</p>
+        <a href="{{ url('api_events_ics', {id: event.id}) }}" class="button">📅 Télécharger .ics</a>
+        
+        {% if event.latitude and event.longitude %}
+        <p>📍 Localisation de l'événement :</p>
+        <a href="https://maps.google.com/?q={{ event.latitude }},{{ event.longitude }}" class="button" target="_blank">🗺️ Voir sur la carte</a>
+        {% endif %}
+        
+        {% elseif status == 'rejected' %}
+        <p>😔 Malheureusement, votre inscription n'a pas pu être acceptée pour cet événement. Cela peut être dû à une capacité limitée ou à des critères spécifiques.</p>
+        
+        <p>N'hésitez pas à consulter nos autres événements disponibles :</p>
+        <a href="{{ url('events') }}" class="button">🎭 Voir les événements</a>
+        
+        {% elseif status == 'pending' %}
+        <p>⏳ Votre inscription est en cours de traitement. Nous vous informerons dès qu'une décision sera prise.</p>
+        
+        <p>Merci pour votre patience !</p>
+        {% endif %}
+        
+        <div class="footer">
+            <p>Cet email a été envoyé automatiquement par MuseHub.</p>
+            <p>Pour toute question, n'hésitez pas à nous contacter.</p>
+            <p>&copy; {{ 'now'|date('Y') }} MuseHub - Plateforme artistique</p>
+        </div>
+    </div>
+</body>
+</html>

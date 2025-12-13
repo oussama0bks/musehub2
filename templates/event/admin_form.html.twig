@@ -38,6 +38,7 @@
                 <div class="col-md-6">
                     <label class="form-label">Date & heure *</label>
                     <input type="datetime-local" name="date_time"
+                        id="eventDateTime"
                         class="form-control"
                         value="{{ event.dateTime ? event.dateTime|date('Y-m-d\\TH:i') : '' }}"
                         required>
@@ -114,6 +115,24 @@
 document.addEventListener('DOMContentLoaded', function() {
     const eventTypeSelect = document.getElementById('eventTypeSelect');
     const typeDescription = document.getElementById('typeDescription');
+    const eventDateTime = document.getElementById('eventDateTime');
+    
+    // Définir la date/heure minimum (maintenant)
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Ajuster pour le fuseau horaire
+    const minDateTime = now.toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:mm
+    eventDateTime.setAttribute('min', minDateTime);
+    
+    // Ajouter une validation lors de la soumission
+    eventDateTime.addEventListener('change', function() {
+        const selectedDate = new Date(this.value);
+        const currentDate = new Date();
+        
+        if (selectedDate < currentDate) {
+            alert('⚠️ Veuillez choisir une date future. Les dates passées ne sont pas autorisées.');
+            this.value = '';
+        }
+    });
     
     function updateTypeDescription() {
         const selectedOption = eventTypeSelect.options[eventTypeSelect.selectedIndex];

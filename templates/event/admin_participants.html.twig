@@ -16,7 +16,7 @@
         <div class="mb-3">
             <strong>Date:</strong> {{ event.dateTime|date('d/m/Y à H:i') }}<br>
             <strong>Lieu:</strong> {{ event.location == 'online' ? 'En ligne' : 'Sur place' }}<br>
-            <strong>Participants:</strong> {{ participants|length }}
+            <strong>Participants:</strong> {{ participantsWithNames|length }}
         </div>
         
         <div class="table-responsive">
@@ -24,26 +24,51 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>UUID Participant</th>
+                        <th>Participant</th>
                         <th>Statut</th>
                         <th>Date d'inscription</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for participant in participants %}
+                    {% for item in participantsWithNames %}
                     <tr>
-                        <td>{{ participant.id }}</td>
-                        <td><code>{{ participant.participantUuid }}</code></td>
+                        <td>{{ item.participant.id }}</td>
                         <td>
-                            <span class="badge bg-{{ participant.status == 'confirmed' ? 'success' : 'warning' }}">
-                                {{ participant.status }}
+                            <strong>{{ item.userName }}</strong>
+                            {% if item.userEmail %}
+                                <br><small class="text-muted">{{ item.userEmail }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ item.participant.status == 'confirmed' ? 'success' : (item.participant.status == 'rejected' ? 'danger' : 'warning') }}" id="status-badge-{{ item.participant.id }}">
+                                {% if item.participant.status == 'confirmed' %}
+                                    Confirmé
+                                {% elseif item.participant.status == 'rejected' %}
+                                    Refusé
+                                {% else %}
+                                    En attente
+                                {% endif %}
                             </span>
                         </td>
-                        <td>{{ participant.createdAt|date('d/m/Y H:i') }}</td>
+                        <td>{{ item.participant.createdAt|date('d/m/Y H:i') }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-success" onclick="updateStatus({{ event.id }}, {{ item.participant.id }}, 'confirmed')" title="Confirmer">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-warning" onclick="updateStatus({{ event.id }}, {{ item.participant.id }}, 'pending')" title="En attente">
+                                    <i class="fas fa-clock"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="updateStatus({{ event.id }}, {{ item.participant.id }}, 'rejected')" title="Refuser">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="text-center py-4">
+                        <td colspan="5" class="text-center py-4">
                             <i class="fas fa-users fa-2x text-muted mb-2"></i>
                             <p class="text-muted">Aucun participant pour le moment</p>
                         </td>
@@ -52,6 +77,52 @@
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<script>
+function updateStatus(eventId, participantId, status) {
+    if (!confirm('Êtes-vous sûr de vouloir changer le statut ?')) {
+        return;
+    }
+    
+    console.log('Sending request:', {eventId, participantId, status});
+    
+    fetch(`/admin/events/${eventId}/participants/${participantId}/status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `status=${status}`
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            const badge = document.getElementById(`status-badge-${participantId}`);
+            badge.className = 'badge bg-' + (status === 'confirmed' ? 'success' : (status === 'rejected' ? 'danger' : 'warning'));
+            badge.textContent = status === 'confirmed' ? 'Confirmé' : (status === 'rejected' ? 'Refusé' : 'En attente');
+            
+            // Toast notification
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-success position-fixed top-0 end-0 m-3';
+            toast.style.zIndex = '9999';
+            toast.textContent = data.message || 'Statut mis à jour et email envoyé';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        } else {
+            alert('Erreur lors de la mise à jour du statut: ' + (data.error || 'Erreur inconnue'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Erreur lors de la mise à jour du statut');
+    });
+}
+</script>
     </div>
 </div>
 {% endblock %}
