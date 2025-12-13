@@ -30,7 +30,10 @@ class Transaction
     private \DateTimeImmutable $date;
 
     #[ORM\Column(length: 20)]
-    private string $status = 'paid'; // 'paid' or 'refunded'
+    private string $status = 'pending_payment'; // 'pending_payment', 'paid', 'refunded', 'canceled'
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $stripeSessionId = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
@@ -121,6 +124,17 @@ class Transaction
     public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getStripeSessionId(): ?string
+    {
+        return $this->stripeSessionId;
+    }
+
+    public function setStripeSessionId(?string $stripeSessionId): self
+    {
+        $this->stripeSessionId = $stripeSessionId;
         return $this;
     }
 

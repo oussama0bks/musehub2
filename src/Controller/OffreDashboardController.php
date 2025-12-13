@@ -6,16 +6,13 @@ use App\Entity\Offre;
 use App\Repository\ListingRepository;
 use App\Repository\OffreRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[Route('/admin/marketplace/offres')]
 #[IsGranted('ROLE_ADMIN')]
@@ -24,7 +21,8 @@ class OffreDashboardController extends AbstractController
     public function __construct(
         private OffreRepository $offreRepository,
         private ListingRepository $listingRepository,
-        private EntityManagerInterface $em
+        private EntityManagerInterface $em,
+        private ValidatorInterface $validator
     ) {
     }
 
@@ -71,95 +69,88 @@ class OffreDashboardController extends AbstractController
     public function new(Request $request): Response
     {
         $offre = new Offre();
-        $offre->setDatePropose(new \DateTime());
-        $offre->setStatut('En attente');
 
-        $form = $this->createFormBuilder($offre)
-            ->add('listing', EntityType::class, [
-                'class' => 'App\Entity\Listing',
-                'choice_label' => function($listing) {
-                    return sprintf('#%d - %s €', 
-                        $listing->getId(),
-                        number_format((float)$listing->getPrice(), 2, ',', ' ')
-                    );
-                },
-                'query_builder' => function (ListingRepository $er) {
-                    return $er->createQueryBuilder('l')
-                        ->where('l.status = :status')
-                        ->setParameter('status', 'available')
-                        ->orderBy('l.id', 'DESC');
-                },
-                'placeholder' => 'Sélectionnez une annonce',
-                'label' => 'Annonce',
-                'required' => true,
-                'attr' => ['class' => 'form-select']
-            ])
-            ->add('utilisateur', EntityType::class, [
-                'class' => 'App\Entity\User',
-                'choice_label' => 'email',
-                'placeholder' => 'Sélectionnez un utilisateur',
-                'label' => 'Acheteur',
-                'required' => true,
-                'attr' => ['class' => 'form-select']
-            ])
-            ->add('prixPropose', NumberType::class, [
-                'label' => 'Prix proposé',
-                'required' => true,
-                'scale' => 2,
-                'html5' => true,
-                'attr' => [
-                    'class' => 'form-control',
-                    'step' => '0.01',
-                    'min' => '0',
-                    'placeholder' => '0.00',
-                    'inputmode' => 'decimal'
-                ]
-            ])
-            ->add('statut', ChoiceType::class, [
-                'label' => 'Statut',
-                'choices' => [
-                    'En attente' => 'En attente',
-                    'Acceptée' => 'Acceptée',
-                    'Refusée' => 'Refusée'
-                ],
-                'attr' => ['class' => 'form-select']
-            ])
-            ->add('datePropose', DateTimeType::class, [
-                'label' => 'Date de l\'offre',
-                'widget' => 'single_text',
-                'html5' => true,
-                'attr' => [
-                    'class' => 'form-control',
-                    'min' => (new \DateTime())->format('Y-m-d\TH:i')
-                ]
-            ])
-            ->add('commentaire', TextareaType::class, [
-                'label' => 'Commentaire',
-                'required' => false,
-                'attr' => [
-                    'class' => 'form-control', 
-                    'rows' => 3,
-                    'placeholder' => 'Commentaire optionnel...'
-                ]
-            ])
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            try {
-                $this->em->persist($offre);
-                $this->em->flush();
-
-                $this->addFlash('success', 'L\'offre a été créée avec succès.');
-                return $this->redirectToRoute('admin_offre_list');
-            } catch (\Exception $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors de la création de l\'offre: ' . $e->getMessage());
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('create_offre_admin', (string)$request->request->get('_token'))) {
+                $this->addFlash('error', 'Jeton CSRF invalide.');
+                return $this->redirectToRoute('admin_offre_new');
             }
+
+            $listingId = $request->request->get('listing_id');
+            $utilisateurId = $request->request->get('utilisateur_id');
+            $prixPropose = $request->request->get('prix_propose');
+            $statut = $request->request->get('statut', 'En attente');
+            $commentaire = $request->request->get('commentaire');
+
+            // Validation via Validator + Assert constraints
+            $data = [
+                'listing_id' => $listingId,
+                'utilisateur_id' => $utilisateurId,
+                'prix_propose' => $prixPropose,
+                'statut' => $statut,
+                'commentaire' => $commentaire,
+            ];
+
+            $collectionConstraint = new Assert\Collection([
+                'fields' => [
+                    'listing_id' => [new Assert\NotBlank(['message' => 'Annonce requise.']), new Assert\Regex(['pattern' => '/^\d+$/', 'message' => 'ID d\'annonce invalide.'])],
+                    'utilisateur_id' => [new Assert\NotBlank(['message' => 'Acheteur requis.'])],
+                    'prix_propose' => [new Assert\NotBlank(['message' => 'Prix requis.']), new Assert\Regex(['pattern' => '/^\d+(?:[\\.,]\d{1,2})?$/', 'message' => 'Prix invalide.']), new Assert\GreaterThan(['value' => 0, 'message' => 'Le prix doit être positif.'])],
+                    'statut' => new Assert\Optional([new Assert\Choice(['choices' => ['En attente', 'Acceptée', 'Refusée'], 'message' => 'Statut invalide.'])]),
+                    'commentaire' => new Assert\Optional([new Assert\Length(['max' => 1000, 'maxMessage' => 'Commentaire trop long.'])]),
+                ],
+                'allowExtraFields' => true,
+            ]);
+
+            $violations = $this->validator->validate($data, $collectionConstraint);
+            if (count($violations) > 0) {
+                $messages = [];
+                foreach ($violations as $violation) {
+                    $messages[] = $violation->getMessage();
+                }
+                $this->addFlash('error', implode(' ', array_unique($messages)));
+                return $this->redirectToRoute('admin_offre_new');
+            }
+
+            $listing = $this->listingRepository->find($listingId);
+            if (!$listing) {
+                $this->addFlash('error', 'Annonce introuvable.');
+                return $this->redirectToRoute('admin_offre_new');
+            }
+
+            // Récupérer l'utilisateur par ID ou créer un nouveau
+            $userRepository = $this->em->getRepository('App:User');
+            $utilisateur = $userRepository->find($utilisateurId);
+            if (!$utilisateur) {
+                // Essayer de le récupérer par email
+                $utilisateur = $userRepository->findOneBy(['email' => $utilisateurId]);
+            }
+            if (!$utilisateur) {
+                $this->addFlash('error', 'Acheteur non trouvé.');
+                return $this->redirectToRoute('admin_offre_new');
+            }
+
+            $offre->setListing($listing);
+            $offre->setUtilisateur($utilisateur);
+            $offre->setPrixPropose((string)$prixPropose);
+            $offre->setStatut($statut);
+            if ($commentaire) {
+                $offre->setCommentaire($commentaire);
+            }
+
+            $this->em->persist($offre);
+            $this->em->flush();
+
+            $this->addFlash('success', 'Offre créée avec succès !');
+            return $this->redirectToRoute('admin_offre_list');
         }
 
-        return $this->render('marketplace/admin_offre_new.html.twig', [
-            'form' => $form->createView(),
+        $listings = $this->listingRepository->findAll();
+
+        return $this->render('marketplace/admin_offre_form.html.twig', [
+            'offre' => $offre,
+            'listings' => $listings,
+            'action' => 'new',
         ]);
     }
 
@@ -182,8 +173,29 @@ class OffreDashboardController extends AbstractController
             $statut = $request->request->get('statut');
             $commentaire = $request->request->get('commentaire');
 
-            if (!$prixPropose || !$statut) {
-                $this->addFlash('error', 'Prix et statut sont requis.');
+            // Validation simple pour l'édition
+            $editData = [
+                'prix_propose' => $prixPropose,
+                'statut' => $statut,
+                'commentaire' => $commentaire,
+            ];
+
+            $editConstraint = new Assert\Collection([
+                'fields' => [
+                    'prix_propose' => [new Assert\NotBlank(['message' => 'Prix requis.']), new Assert\Regex(['pattern' => '/^\d+(?:[\\.,]\d{1,2})?$/', 'message' => 'Prix invalide.']), new Assert\GreaterThan(['value' => 0, 'message' => 'Le prix doit être positif.'])],
+                    'statut' => [new Assert\NotBlank(['message' => 'Statut requis.']), new Assert\Choice(['choices' => ['En attente', 'Acceptée', 'Refusée'], 'message' => 'Statut invalide.'])],
+                    'commentaire' => new Assert\Optional([new Assert\Length(['max' => 1000])]),
+                ],
+                'allowExtraFields' => true,
+            ]);
+
+            $violationsEdit = $this->validator->validate($editData, $editConstraint);
+            if (count($violationsEdit) > 0) {
+                $messages = [];
+                foreach ($violationsEdit as $v) {
+                    $messages[] = $v->getMessage();
+                }
+                $this->addFlash('error', implode(' ', array_unique($messages)));
                 return $this->redirectToRoute('admin_offre_edit', ['id' => $id]);
             }
 

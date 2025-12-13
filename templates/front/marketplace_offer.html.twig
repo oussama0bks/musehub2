@@ -27,42 +27,322 @@
                     </div>
                     <p class="lead">
                         {% if listing.stock > 0 %}
-                            <strong>{{ listing.stock }}</strong> pièce(s) restantes.
+                            <strong>{{ listing.stock }}</strong> pièce(s) restante(s).
                         {% else %}
                             Stock non communiqué.
                         {% endif %}
                     </p>
                     <p class="text-muted">
                         Cette page vous permet de consulter toutes les informations publiques de l'offre.
-                        Pour finaliser l'achat, utilisez le bouton ci-dessous; si vous n'êtes pas connecté, vous serez redirigé vers la page de connexion.
+                        Vous pouvez soit acheter immédiatement au prix affiché, soit proposer une offre personnalisée.
                     </p>
                 </div>
             </div>
         </div>
         <div class="col-lg-4">
-            <div class="card">
+            <div class="card sticky-top" style="top: 20px;">
                 <div class="card-body">
-                    <h5 class="card-title">Passer commande</h5>
+                    <h5 class="card-title mb-4">Actions</h5>
+                    
                     {% if listing.status != 'available' %}
                         <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-circle me-2"></i>
                             Cette offre n'est pas disponible pour le moment.
                         </div>
-                    {% elseif app.user %}
-                        <p class="text-muted">Connecté en tant que {{ app.user.email }}</p>
-                        <a href="{{ path('marketplace') }}#listing-{{ listing.id }}" class="btn btn-primary w-100">
-                            <i class="fas fa-shopping-cart me-2"></i>Commander depuis la liste
+                    {% elseif not app.user %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Connectez-vous pour acheter ou faire une offre.
+                        </div>
+                        <a href="{{ path('login') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
                         </a>
                     {% else %}
-                        <p class="text-muted">Connectez-vous pour acheter cette œuvre.</p>
-                        <a href="{{ path('login') }}" class="btn btn-outline-primary w-100">
-                            Se connecter
-                        </a>
+                        <!-- Bouton Acheter Maintenant -->
+                        <button 
+                            type="button" 
+                            class="btn btn-success btn-lg w-100 mb-3" 
+                            id="btnBuyNow"
+                            data-listing-id="{{ listing.id }}"
+                        >
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            <strong>Acheter maintenant</strong>
+                            <br>
+                            <small>{{ listing.price }} €</small>
+                        </button>
+
+                        <!-- Bouton Faire une Offre -->
+                        <button 
+                            type="button" 
+                            class="btn btn-outline-primary btn-lg w-100" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#offerModal"
+                            id="btnOffer"
+                        >
+                            <i class="fas fa-handshake me-2"></i>
+                            <strong>Faire une offre</strong>
+                        </button>
+
+                        <p class="text-muted small mt-3 mb-0">
+                            Connecté en tant que <strong>{{ app.user.email }}</strong>
+                        </p>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal: Faire une Offre -->
+{% if app.user and listing.status == 'available' %}
+<div class="modal fade" id="offerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-handshake me-2"></i>Faire une offre
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="offerForm">
+                <div class="modal-body">
+                    <p class="text-muted">
+                        Proposez un prix pour cette annonce. Le vendeur recevra votre offre et pourra l'accepter ou la refuser.
+                    </p>
+
+                    <!-- Prix proposé -->
+                    <div class="mb-3">
+                        <label for="prixPropose" class="form-label">
+                            <strong>Prix proposé *</strong>
+                        </label>
+                        <div class="input-group">
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="prixPropose" 
+                                name="prix_propose" 
+                                placeholder="{{ listing.price }}"
+                                step="0.01"
+                                min="0.01"
+                                required
+                            >
+                            <span class="input-group-text">€</span>
+                        </div>
+                        <small class="text-muted">Prix demandé : <strong>{{ listing.price }} €</strong></small>
+                    </div>
+
+                    <!-- Commentaire -->
+                    <div class="mb-3">
+                        <label for="commentaire" class="form-label">
+                            Commentaire (optionnel)
+                        </label>
+                        <textarea 
+                            class="form-control" 
+                            id="commentaire" 
+                            name="commentaire" 
+                            rows="3"
+                            placeholder="Expliquez votre offre ou posez une question..."
+                        ></textarea>
+                    </div>
+
+                    <!-- Statut (caché, par défaut "En attente") -->
+                    <input type="hidden" name="statut" value="En attente">
+                    <input type="hidden" name="listing_id" value="{{ listing.id }}">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitOfferBtn">
+                        <i class="fas fa-paper-plane me-2"></i>Envoyer l'offre
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Scripts -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnBuyNow = document.getElementById('btnBuyNow');
+    const offerForm = document.getElementById('offerForm');
+    const submitOfferBtn = document.getElementById('submitOfferBtn');
+
+    // ========== ACHAT IMMÉDIAT ==========
+    if (btnBuyNow) {
+        btnBuyNow.addEventListener('click', function(e) {
+            e.preventDefault();
+            const listingId = this.getAttribute('data-listing-id');
+            
+            // Confirmation
+            if (!confirm('Confirmer l\'achat de cette œuvre au prix de {{ listing.price }} € ?')) {
+                return;
+            }
+
+            // Désactiver le bouton
+            btnBuyNow.disabled = true;
+            const originalText = btnBuyNow.innerHTML;
+            btnBuyNow.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Traitement en cours...';
+
+            // Appel API
+            fetch(`/api/marketplace/buy/${listingId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Erreur lors de l\'achat');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Stripe : rediriger vers le checkout
+                if (data.checkoutUrl) {
+                    showSuccessAlert(
+                        'Redirection Stripe...',
+                        'Vous allez être redirigé vers le paiement'
+                    );
+                    setTimeout(() => {
+                        window.location.href = data.checkoutUrl;
+                    }, 1000);
+                } else {
+                    // Fallback (achat direct sans Stripe)
+                    showSuccessAlert(
+                        'Achat confirmé !',
+                        'Votre commande a été créée avec succès.'
+                    );
+                    setTimeout(() => {
+                        window.location.href = '{{ path("marketplace") }}';
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorAlert('Erreur', error.message);
+                btnBuyNow.disabled = false;
+                btnBuyNow.innerHTML = originalText;
+            });
+        });
+    }
+
+    // ========== FAIRE UNE OFFRE ==========
+    if (offerForm) {
+        offerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(offerForm);
+            const prixPropose = formData.get('prix_propose');
+
+            if (!prixPropose || parseFloat(prixPropose) <= 0) {
+                showErrorAlert('Erreur', 'Veuillez saisir un prix valide');
+                return;
+            }
+
+            // Désactiver le bouton
+            submitOfferBtn.disabled = true;
+            const originalText = submitOfferBtn.innerHTML;
+            submitOfferBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Envoi...';
+
+            // Appel API - Créer une offre via OffreController
+            fetch('{{ path("offre_api_create") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    listing_id: formData.get('listing_id'),
+                    prix_propose: prixPropose,
+                    commentaire: formData.get('commentaire') || '',
+                    statut: 'En attente'
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || data.message || 'Erreur lors de la création de l\'offre');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                showSuccessAlert(
+                    'Offre créée !',
+                    'Votre offre a été envoyée au vendeur. Vous serez notifié de sa réponse.'
+                );
+                // Fermer la modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('offerModal'));
+                modal.hide();
+                // Réinitialiser le formulaire
+                offerForm.reset();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorAlert('Erreur', error.message);
+            })
+            .finally(() => {
+                submitOfferBtn.disabled = false;
+                submitOfferBtn.innerHTML = originalText;
+            });
+        });
+    }
+
+    // ========== FONCTIONS UTILITAIRES ==========
+    function showSuccessAlert(title, message) {
+        const alertHtml = `
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                <strong>${title}</strong><br>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', alertHtml);
+    }
+
+    function showErrorAlert(title, message) {
+        const alertHtml = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                <strong>${title}</strong><br>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', alertHtml);
+        setTimeout(() => {
+            document.querySelector('.alert-danger')?.remove();
+        }, 5000);
+    }
+});
+</script>
+
+<style>
+    .sticky-top {
+        position: sticky;
+        top: 20px;
+    }
+    
+    #btnBuyNow {
+        font-size: 1.1rem;
+        padding: 0.75rem 1.25rem;
+        transition: all 0.3s ease;
+    }
+    
+    #btnBuyNow:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+    
+    #btnBuyNow:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+</style>
 {% endblock %}
 
 

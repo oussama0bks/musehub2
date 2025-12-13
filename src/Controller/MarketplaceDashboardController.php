@@ -84,6 +84,24 @@ class MarketplaceDashboardController extends AbstractController
         ]);
     }
 
+    #[Route('/listings/{id}/show', name: 'admin_marketplace_listing_show', methods: ['GET'])]
+    public function showListing(int $id): Response
+    {
+        $listing = $this->listingRepository->find($id);
+        if (!$listing) {
+            $this->addFlash('error', 'Annonce introuvable.');
+            return $this->redirectToRoute('admin_marketplace_list');
+        }
+
+        // Récupérer toutes les offres liées à cette annonce
+        $offres = $this->offreRepository->findByListing($listing->getId());
+
+        return $this->render('marketplace/admin_listing_show.html.twig', [
+            'listing' => $listing,
+            'offres' => $offres,
+        ]);
+    }
+
     #[Route('/listings/new', name: 'admin_marketplace_listing_new', methods: ['GET', 'POST'])]
     public function newListing(Request $request): Response
     {

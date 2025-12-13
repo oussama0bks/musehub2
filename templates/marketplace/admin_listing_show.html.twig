@@ -1,0 +1,160 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Annonce #{{ listing.id }} - Marketplace{% endblock %}
+
+{% block body %}
+<div class="mb-4 d-flex align-items-center gap-3">
+    <a href="{{ path('admin_marketplace_list') }}" class="btn btn-link text-decoration-none">
+        <i class="fas fa-arrow-left me-2"></i>Retour
+    </a>
+    <div>
+        <h1 class="h3 mb-0">Annonce #{{ listing.id }}</h1>
+        <p class="text-muted mb-0">Détails et gestion des offres</p>
+    </div>
+</div>
+
+<!-- Informations Annonce -->
+<div class="card mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informations</h5>
+        <div class="d-flex gap-2">
+            <a href="{{ path('admin_marketplace_listing_edit', {id: listing.id}) }}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-edit me-1"></i>Modifier
+            </a>
+            <form action="{{ path('admin_marketplace_listing_delete', {id: listing.id}) }}" method="POST" style="display:inline;" onsubmit="return confirm('Supprimer cette annonce ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete_listing_' ~ listing.id) }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash me-1"></i>Supprimer
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div>
+                    <strong class="text-muted small">UUID Artwork</strong>
+                    <p class="mb-3"><code>{{ listing.artworkUuid }}</code></p>
+                </div>
+                <div>
+                    <strong class="text-muted small">Prix</strong>
+                    <p class="mb-3">{{ listing.price }} €</p>
+                </div>
+                <div>
+                    <strong class="text-muted small">Stock</strong>
+                    <p class="mb-0">{{ listing.stock }} unité(s)</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div>
+                    <strong class="text-muted small">Statut</strong>
+                    <p class="mb-3">
+                        {% set badge = listing.status == 'available' ? 'success' : (listing.status == 'paused' ? 'warning' : 'danger') %}
+                        <span class="badge bg-{{ badge }} p-2">{{ listing.status }}</span>
+                    </p>
+                </div>
+                <div>
+                    <strong class="text-muted small">Créé le</strong>
+                    <p class="mb-3">{{ listing.createdAt|date('d/m/Y à H:i') }}</p>
+                </div>
+                <div>
+                    <strong class="text-muted small">UUID</strong>
+                    <p class="mb-0"><code>{{ listing.uuid|slice(0, 12) }}...</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section Offres -->
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-handshake me-2"></i>Offres ({{ offres|length }})</h5>
+        <span class="badge bg-info">{{ offres|length }} offre{{ offres|length != 1 ? 's' : '' }}</span>
+    </div>
+    <div class="card-body">
+        {% if offres|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID Offre</th>
+                        <th>Acheteur</th>
+                        <th>Prix Proposé</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th>Commentaire</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for offre in offres %}
+                    <tr>
+                        <td>
+                            <strong>#{{ offre.id }}</strong>
+                        </td>
+                        <td>
+                            {{ offre.utilisateur.username }}<br>
+                            <small class="text-muted">{{ offre.utilisateur.email }}</small>
+                        </td>
+                        <td>
+                            <strong>{{ offre.prixPropose }} €</strong>
+                        </td>
+                        <td>
+                            {{ offre.datePropose|date('d/m/Y H:i') }}
+                        </td>
+                        <td>
+                            {% set statusColor = offre.statut == 'En attente' ? 'warning' : (offre.statut == 'Acceptée' ? 'success' : 'danger') %}
+                            <span class="badge bg-{{ statusColor }}">{{ offre.statut }}</span>
+                        </td>
+                        <td>
+                            {% if offre.commentaire %}
+                                <small>{{ offre.commentaire|slice(0, 30) }}{{ offre.commentaire|length > 30 ? '...' : '' }}</small>
+                            {% else %}
+                                <small class="text-muted">-</small>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{{ path('admin_offre_edit', {id: offre.id}) }}" class="btn btn-outline-secondary" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if offre.statut == 'En attente' %}
+                                <form action="{{ path('admin_offre_accept', {id: offre.id}) }}" method="POST" style="display:inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('accept_offre_' ~ offre.id) }}">
+                                    <button type="submit" class="btn btn-outline-success btn-sm" title="Accepter">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                <form action="{{ path('admin_offre_refuse', {id: offre.id}) }}" method="POST" style="display:inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('refuse_offre_' ~ offre.id) }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Refuser">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <form action="{{ path('admin_offre_delete', {id: offre.id}) }}" method="POST" style="display:inline;" onsubmit="return confirm('Supprimer cette offre ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_offre_' ~ offre.id) }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-handshake fa-3x text-muted mb-3" style="opacity: 0.3;"></i>
+            <p class="text-muted">Aucune offre pour cette annonce</p>
+            <a href="{{ path('admin_offre_new') }}" class="btn btn-sm btn-primary mt-2">
+                <i class="fas fa-plus me-1"></i>Créer une offre
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

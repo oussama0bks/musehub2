@@ -4,21 +4,91 @@ namespace App\Controller;
 
 use App\Entity\Listing;
 use App\Entity\Offre;
+use App\Entity\User;
 use App\Form\OffreType;
+use App\Repository\ListingRepository;
 use App\Repository\OffreRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/offre', name: 'offre_')]
 class OffreController extends AbstractController
 {
     public function __construct(
         private OffreRepository $offreRepository,
+        private ListingRepository $listingRepository,
+        private UserRepository $userRepository,
         private EntityManagerInterface $entityManager,
     ) {
+    }
+
+    /**
+     * API: Crée une nouvelle offre via JSON
+     */
+    #[Route('/api/create', name: 'api_create', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function apiCreate(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return new JsonResponse(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $listingId = $data['listing_id'] ?? null;
+        $prixPropose = $data['prix_propose'] ?? null;
+        $commentaire = $data['commentaire'] ?? null;
+        $statut = $data['statut'] ?? 'En attente';
+
+        // Validations
+        if (!$listingId || !$prixPropose) {
+            return new JsonResponse(
+                ['error' => 'listing_id et prix_propose sont requis'],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        $listing = $this->listingRepository->find($listingId);
+        if (!$listing) {
+            return new JsonResponse(['error' => 'Annonce introuvable'], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($listing->getStatus() !== 'available') {
+            return new JsonResponse(
+                ['error' => 'Cette annonce n\'est pas disponible'],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return new JsonResponse(['error' => 'Non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Créer l'offre
+        $offre = new Offre();
+        $offre->setListing($listing);
+        $offre->setUtilisateur($user);
+        $offre->setPrixPropose((string)$prixPropose);
+        $offre->setStatut($statut);
+        if ($commentaire) {
+            $offre->setCommentaire($commentaire);
+        }
+
+        $this->entityManager->persist($offre);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
+            'id' => $offre->getId(),
+            'message' => 'Offre créée avec succès',
+            'status' => $offre->getStatut(),
+        ], Response::HTTP_CREATED);
     }
 
     /**
