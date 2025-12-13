@@ -1,0 +1,41 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Paiement Réussi - MuseHub{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card border-success">
+                <div class="card-body py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h1 class="h2 text-success mb-3">Paiement réussi !</h1>
+                    <p class="lead text-muted mb-4">
+                        Merci pour votre achat. Votre commande a été confirmée et vous allez recevoir une confirmation par email.
+                    </p>
+
+                    <div class="alert alert-info mb-4">
+                        <strong>Prochaines étapes :</strong>
+                        <ul class="mb-0 mt-2 text-start">
+                            <li>Consultez vos achats dans votre profil</li>
+                            <li>Attendez la confirmation du vendeur</li>
+                            <li>Téléchargez votre facture si nécessaire</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('marketplace') }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Retour à la marketplace
+                        </a>
+                        <a href="{{ path('home') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i>Accueil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

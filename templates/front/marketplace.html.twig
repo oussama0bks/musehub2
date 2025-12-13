@@ -97,12 +97,16 @@
                             Consulter l'offre
                         </a>
                         {% if listing.status == 'available' and app.user %}
+                            <!-- Bouton Acheter Maintenant -->
+                            <button type="button" class="btn btn-success btn-sm btn-buy" data-listing-id="{{ listing.id }}">
+                                <i class="fas fa-shopping-cart me-1"></i> Acheter maintenant
+                            </button>
                             <!-- Bouton pour ouvrir le formulaire de création d'offre -->
                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#offreModal{{ listing.id }}">
                                 <i class="fas fa-handshake"></i> Faire une Offre
                             </button>
                         {% elseif listing.status == 'available' %}
-                            <a href="{{ path('login') }}" class="btn btn-outline-primary btn-sm">Se connecter pour faire une offre</a>
+                            <a href="{{ path('login') }}" class="btn btn-outline-primary btn-sm">Se connecter pour acheter</a>
                         {% else %}
                             <button class="btn btn-secondary btn-sm" disabled>Épuisé</button>
                         {% endif %}
@@ -170,40 +174,91 @@
                 const listingId = btn.dataset.listingId;
                 if (!listingId) return;
 
+                // Confirmation
+                if (!confirm('Confirmer l\'achat de cette annonce ?')) {
+                    return;
+                }
+
                 btn.disabled = true;
-                const originalText = btn.textContent;
-                btn.textContent = 'Traitement...';
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Traitement...';
 
                 fetch('/api/marketplace/buy/' + listingId, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
                     body: JSON.stringify({})
                 })
                 .then(async (res) => {
+                    const data = await res.json();
                     if (!res.ok) {
-                        const err = await res.json().catch(() => ({}));
-                        throw new Error(err.error || res.statusText || 'Erreur');
+                        throw new Error(data.error || res.statusText || 'Erreur inconnue');
                     }
-                    return res.json();
+                    return data;
                 })
                 .then((data) => {
-                    // show success message and update UI
-                    alert('Achat réussi — transaction: ' + (data.transaction_uuid || 'inconnue'));
-                    // optionally reload to reflect stock/status change
-                    window.location.reload();
+                    // Stripe : rediriger vers le checkout
+                    if (data.checkoutUrl) {
+                        showSuccessAlert(
+                            'Redirection Stripe...',
+                            'Vous allez être redirigé vers le paiement'
+                        );
+                        setTimeout(() => {
+                            window.location.href = data.checkoutUrl;
+                        }, 1000);
+                    } else {
+                        // Fallback (achat direct sans Stripe)
+                        showSuccessAlert(
+                            'Achat réussi !',
+                            'Votre commande a été créée.'
+                        );
+                        setTimeout(() => {
+                            window.location.href = '{{ path("marketplace") }}';
+                        }, 2000);
+                    }
                 })
                 .catch((err) => {
-                    console.error(err);
-                    alert('Échec de l\'achat: ' + (err.message || 'Erreur')); 
+                    console.error('Buy error:', err);
+                    showErrorAlert(
+                        'Erreur',
+                        err.message || 'Impossible d\'effectuer l\'achat'
+                    );
                     btn.disabled = false;
-                    btn.textContent = originalText;
+                    btn.innerHTML = originalText;
                 });
             }
 
+            // Attacher le handler aux boutons avec classe 'btn-buy'
             document.querySelectorAll('.btn-buy').forEach(function (el) {
                 el.addEventListener('click', handleBuyClick);
             });
         });
+
+        // Fonctions d'alerte
+        function showSuccessAlert(title, message) {
+            const alertHtml = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                    <strong>${title}</strong><br>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', alertHtml);
+        }
+
+        function showErrorAlert(title, message) {
+            const alertHtml = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                    <strong>${title}</strong><br>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', alertHtml);
+            setTimeout(() => {
+                document.querySelector('.alert-danger')?.remove();
+            }, 5000);
+        }
     </script>
 {% endblock %}
 

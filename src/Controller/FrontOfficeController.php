@@ -298,4 +298,22 @@ class FrontOfficeController extends AbstractController
 
         return $map;
     }
+
+    /**
+     * Page de succès après paiement Stripe
+     */
+    #[Route('/marketplace/success', name: 'marketplace_payment_success')]
+    public function paymentSuccess(): Response
+    {
+        return $this->render('front/payment_success.html.twig');
+    }
+
+    /**
+     * Page d'annulation après paiement Stripe
+     */
+    #[Route('/marketplace/cancel', name: 'marketplace_payment_cancel')]
+    public function paymentCancel(): Response
+    {
+        return $this->render('front/payment_cancel.html.twig');
+    }
 }
