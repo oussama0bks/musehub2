@@ -16,11 +16,11 @@
 <div class="card mb-4" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
     <div class="card-body">
         <form method="GET" class="row g-3 align-items-end">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label text-muted small mb-1">Rechercher</label>
                 <input type="text" name="q" class="form-control" value="{{ search }}" placeholder="Titre ou lieu">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label text-muted small mb-1">Statut</label>
                 <select name="status" class="form-select">
                     {% set statuses = {
@@ -38,21 +38,30 @@
             <div class="col-md-3">
                 <label class="form-label text-muted small mb-1">Trier par</label>
                 <select name="sort" class="form-select">
-                    <option value="id_asc" {{ sortBy == 'id_asc' ? 'selected' : '' }}>ID (croissant)</option>
-                    <option value="id_desc" {{ sortBy == 'id_desc' ? 'selected' : '' }}>ID (décroissant)</option>
-                    <option value="date_desc" {{ sortBy == 'date_desc' ? 'selected' : '' }}>Date (plus récent)</option>
-                    <option value="date_asc" {{ sortBy == 'date_asc' ? 'selected' : '' }}>Date (plus ancien)</option>
-                    <option value="title_asc" {{ sortBy == 'title_asc' ? 'selected' : '' }}>Titre (A-Z)</option>
-                    <option value="title_desc" {{ sortBy == 'title_desc' ? 'selected' : '' }}>Titre (Z-A)</option>
-                    <option value="created_desc" {{ sortBy == 'created_desc' ? 'selected' : '' }}>Ajouté (récent)</option>
-                    <option value="created_asc" {{ sortBy == 'created_asc' ? 'selected' : '' }}>Ajouté (ancien)</option>
+                    {% set sorts = {
+                        'date_desc': 'Date (récent → ancien)',
+                        'date_asc': 'Date (ancien → récent)',
+                        'title_asc': 'Titre (A → Z)',
+                        'title_desc': 'Titre (Z → A)',
+                        'id_asc': 'ID (croissant)',
+                        'id_desc': 'ID (décroissant)',
+                        'created_asc': 'Création (ancien → récent)',
+                        'created_desc': 'Création (récent → ancien)'
+                    } %}
+                    {% for key, label in sorts %}
+                        <option value="{{ key }}" {{ sortBy == key ? 'selected' : '' }}>{{ label }}</option>
+                    {% endfor %}
                 </select>
             </div>
-            <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-primary flex-grow-1">Appliquer</button>
-                <a href="{{ path('admin_events_list') }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-redo"></i>
-                </a>
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-check me-2"></i>Appliquer
+                    </button>
+                    <a href="{{ path('admin_events_list') }}" class="btn btn-outline-secondary px-4">
+                        <i class="fas fa-redo me-2"></i>Réinitialiser
+                    </a>
+                </div>
             </div>
         </form>
     </div>

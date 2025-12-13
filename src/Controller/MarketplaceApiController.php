@@ -7,6 +7,7 @@ use App\Entity\Transaction;
 use App\Repository\ListingRepository;
 use App\Repository\TransactionRepository;
 use App\Service\PaymentService;
+use App\Service\StripePaymentService;
 use App\Service\InvoiceGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,6 +25,7 @@ class MarketplaceApiController extends AbstractController
         private TransactionRepository $transactionRepository,
         private EntityManagerInterface $em,
         private PaymentService $paymentService,
+        private StripePaymentService $stripePaymentService,
         private InvoiceGenerator $invoiceGenerator
     ) {
     }
@@ -114,49 +116,46 @@ class MarketplaceApiController extends AbstractController
     }
 
     #[Route('/buy/{id}', name: 'api_marketplace_buy', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function buy(int $id, Request $request): JsonResponse
     {
         $listing = $this->listingRepository->find($id);
         if (!$listing) {
-            return new JsonResponse(['error' => 'Listing not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['error' => 'Annonce non trouvée'], Response::HTTP_NOT_FOUND);
         }
 
-        if ($listing->getStatus() !== 'available' || $listing->getStock() <= 0) {
-            return new JsonResponse(['error' => 'Listing not available'], Response::HTTP_BAD_REQUEST);
+        if ($listing->getStatus() !== 'available') {
+            return new JsonResponse(['error' => 'Cette annonce n\'est pas disponible'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Allow purchase without authentication (guest checkout)
-        // Or use authenticated user if available
-        $data = json_decode($request->getContent(), true);
-        $buyerUuid = null;
-        
-        $user = $this->getUser();
-        if ($user) {
-            $buyerUuid = $user->getUuid();
-        } elseif (isset($data['buyer_uuid']) && !empty($data['buyer_uuid'])) {
-            $buyerUuid = $data['buyer_uuid'];
-        } else {
-            // Generate a temporary UUID for guest purchase
-            $buyerUuid = 'guest_' . uniqid();
-        }
-
-        // Process payment
-        $transaction = $this->paymentService->processPayment($listing, $buyerUuid);
-
-        // Update stock
-        $listing->setStock($listing->getStock() - 1);
         if ($listing->getStock() <= 0) {
-            $listing->setStatus('sold_out');
+            return new JsonResponse(['error' => 'Stock épuisé'], Response::HTTP_BAD_REQUEST);
         }
 
-        $this->em->persist($transaction);
-        $this->em->flush();
+        // Get authenticated user
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Vous devez être connecté'], Response::HTTP_UNAUTHORIZED);
+        }
 
-        return new JsonResponse([
-            'transaction_uuid' => $transaction->getUuid(),
-            'amount' => $transaction->getAmount(),
-            'message' => 'Purchase successful',
-        ], Response::HTTP_CREATED);
+        try {
+            // Créer la session Stripe Checkout
+            $stripeData = $this->stripePaymentService->createCheckoutSession(
+                $listing,
+                $user->getEmail(),
+                $user->getUuid()
+            );
+
+            return new JsonResponse([
+                'checkoutUrl' => $stripeData['checkoutUrl'],
+                'sessionId' => $stripeData['sessionId'],
+                'message' => 'Session Stripe créée avec succès',
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Erreur lors de la création de la session Stripe: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     #[Route('/listing/{id}', name: 'api_marketplace_update_listing', methods: ['PUT'])]

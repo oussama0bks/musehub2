@@ -101,6 +101,21 @@
         </a>
     </div>
 
+    <!-- Module Types d'événements -->
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ path('admin_event_types_list') }}" class="module-card">
+            <div class="d-flex align-items-center">
+                <div class="icon-wrapper">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="mb-1">Types d'événements</h5>
+                    <p class="text-muted small mb-0">Configuration</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
     <!-- Module Marketplace -->
     <div class="col-md-6 col-lg-4">
         <a href="{{ path('admin_marketplace_list') }}" class="module-card">
@@ -111,6 +126,21 @@
                 <div class="ms-3">
                     <h5 class="mb-1">Marketplace</h5>
                     <p class="text-muted small mb-0">{{ stats.listings }} annonces</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Module Transactions -->
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ path('admin_transactions_list') }}" class="module-card">
+            <div class="d-flex align-items-center">
+                <div class="icon-wrapper">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="mb-1">Transactions</h5>
+                    <p class="text-muted small mb-0">Consulter les dernières transactions</p>
                 </div>
             </div>
         </a>
@@ -145,21 +175,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Module Notifications -->
-    <div class="col-md-6 col-lg-4">
-        <a href="{{ path('admin_notifications_list') }}" class="module-card">
-            <div class="d-flex align-items-center">
-                <div class="icon-wrapper">
-                    <i class="fas fa-bell"></i>
-                </div>
-                <div class="ms-3">
-                    <h5 class="mb-1">Notifications</h5>
-                    <p class="text-muted small mb-0">Rappels et envois</p>
-                </div>
-            </div>
-        </a>
-    </div>
 </div>
 
 <!-- Actions rapides -->
@@ -187,12 +202,6 @@
                     <div class="col-md-3">
                         <a href="{{ path('admin_community_list') }}" class="btn btn-warning w-100">
                             <i class="fas fa-shield-alt me-2"></i>Modération
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="{{ path('admin_notifications_list') }}" class="btn btn-outline-secondary w-100">
-                            <i class="fas 
-fa-bell me-2"></i>Notifications
                         </a>
                     </div>
                 </div>

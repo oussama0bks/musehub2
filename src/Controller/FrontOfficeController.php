@@ -6,7 +6,9 @@ use App\Repository\ArtworkRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
 use App\Repository\ListingRepository;
+use App\Repository\OffreRepository;
 use App\Repository\ParticipantRepository;
+use App\Repository\PostReactionRepository;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,7 +22,9 @@ class FrontOfficeController extends AbstractController
         private CategoryRepository $categoryRepository,
         private EventRepository $eventRepository,
         private ListingRepository $listingRepository,
+        private OffreRepository $offreRepository,
         private PostRepository $postRepository,
+        private PostReactionRepository $postReactionRepository,
         private ParticipantRepository $participantRepository,
         private UserRepository $userRepository
     ) {
@@ -42,7 +46,7 @@ class FrontOfficeController extends AbstractController
             : $visibleArtworks;
 
         $artistNames = $this->buildArtistNamesMap($visibleArtworks);
-        
+
         $upcomingEvents = $this->eventRepository->findUpcoming();
         $latestPosts = $this->postRepository->findBy([], ['createdAt' => 'DESC'], 3);
 
@@ -83,23 +87,7 @@ class FrontOfficeController extends AbstractController
             $artworks
         ))));
 
-        if (empty($artistUuids)) {
-            return [];
-        }
-
-        $artists = $this->userRepository->createQueryBuilder('u')
-            ->where('u.uuid IN (:uuids)')
-            ->setParameter('uuids', $artistUuids)
-            ->getQuery()
-            ->getResult();
-
-        $map = [];
-        foreach ($artists as $artist) {
-            $displayName = $artist->getUsername() ?: $artist->getEmail() ?: 'Artiste MuseHub';
-            $map[$artist->getUuid()] = $displayName;
-        }
-
-        return $map;
+        return $this->fetchUserNamesByUuid($artistUuids, 'Artiste MuseHub');
     }
 
     #[Route('/artworks', name: 'artworks')]
@@ -170,9 +158,32 @@ class FrontOfficeController extends AbstractController
             );
         }
 
+        // Récupérer les offres pour chaque listing
+        $offresParListing = [];
+        foreach ($listings as $listing) {
+            $offresParListing[$listing->getId()] = $this->offreRepository->findByListing($listing->getId());
+        }
+
         return $this->render('front/marketplace.html.twig', [
             'listings' => $listings,
             'userArtworks' => $userArtworks,
+            'offresParListing' => $offresParListing,
+        ]);
+    }
+
+    #[Route('/marketplace/test', name: 'marketplace_test')]
+    public function marketplaceTest(): Response
+    {
+        $listings = $this->listingRepository->findAvailable();
+
+        $offresParListing = [];
+        foreach ($listings as $listing) {
+            $offresParListing[$listing->getId()] = $this->offreRepository->findByListing($listing->getId());
+        }
+
+        return $this->render('front/marketplace_test.html.twig', [
+            'listings' => $listings,
+            'offresParListing' => $offresParListing,
         ]);
     }
 
@@ -190,14 +201,20 @@ class FrontOfficeController extends AbstractController
     }
 
     #[Route('/community', name: 'community')]
-    public function community(): Response
+    public function community(\Symfony\Component\HttpFoundation\Request $request): Response
     {
         $posts = $this->postRepository->findBy([], ['createdAt' => 'DESC'], 20);
         $authorNames = $this->buildAuthorNamesMap($posts);
+        $commentAuthorNames = $this->buildCommenterNamesMap($posts);
+        $userReactions = $this->buildUserReactionMap($posts);
 
         return $this->render('front/community.html.twig', [
             'posts' => $posts,
             'authorNames' => $authorNames,
+            'commentAuthorNames' => $commentAuthorNames,
+            'userReactions' => $userReactions,
+            'currentCategory' => $request->query->get('category', ''),
+            'currentSort' => $request->query->get('sort', 'recent'),
         ]);
     }
 
@@ -213,21 +230,92 @@ class FrontOfficeController extends AbstractController
             $posts
         ))));
 
-        if (empty($authorUuids)) {
+        return $this->fetchUserNamesByUuid($authorUuids);
+    }
+
+    /**
+     * @param array<int, \App\Entity\Post> $posts
+     */
+    private function buildCommenterNamesMap(array $posts): array
+    {
+        $commentUuids = [];
+        foreach ($posts as $post) {
+            foreach ($post->getComments() as $comment) {
+                $uuid = $comment->getCommenterUuid();
+                if ($uuid && !str_starts_with($uuid, 'guest_')) {
+                    $commentUuids[] = $uuid;
+                }
+            }
+        }
+
+        return $this->fetchUserNamesByUuid(array_values(array_unique($commentUuids)));
+    }
+
+    /**
+     * @param array<int, \App\Entity\Post> $posts
+     */
+    private function buildUserReactionMap(array $posts): array
+    {
+        $user = $this->getUser();
+        if (!$user) {
             return [];
         }
 
-        $authors = $this->userRepository->createQueryBuilder('u')
+        $postIds = array_values(array_filter(array_map(
+            static fn($post) => $post->getId(),
+            $posts
+        )));
+
+        if (empty($postIds)) {
+            return [];
+        }
+
+        $reactions = $this->postReactionRepository->findByUserAndPostIds($user->getUuid(), $postIds);
+
+        $map = [];
+        foreach ($reactions as $reaction) {
+            $map[$reaction->getPost()->getId()] = $reaction->getType();
+        }
+
+        return $map;
+    }
+
+    private function fetchUserNamesByUuid(array $uuids, string $fallback = 'Membre MuseHub'): array
+    {
+        if (empty($uuids)) {
+            return [];
+        }
+
+        $users = $this->userRepository->createQueryBuilder('u')
             ->where('u.uuid IN (:uuids)')
-            ->setParameter('uuids', $authorUuids)
+            ->setParameter('uuids', $uuids)
             ->getQuery()
             ->getResult();
 
         $map = [];
-        foreach ($authors as $author) {
-            $map[$author->getUuid()] = $author->getUsername() ?: $author->getEmail() ?: 'Membre MuseHub';
+        foreach ($users as $user) {
+            $displayName = $user->getUsername() ?: $user->getEmail() ?: $fallback;
+            $map[$user->getUuid()] = $displayName;
         }
 
         return $map;
+    }
+
+    /**
+     * Page de succès après paiement Stripe
+     */
+    #[Route('/marketplace/success', name: 'marketplace_payment_success')]
+    public function paymentSuccess(): Response
+    {
+        return $this->render('front/payment_success.html.twig');
+    }
+
+    /**
+     * Page d'annulation après paiement Stripe
+     */
+    #[Route('/marketplace/cancel', name: 'marketplace_payment_cancel')]
+    public function paymentCancel(): Response
+    {
+        return $this->render('front/payment_cancel.html.twig');
     }
 }

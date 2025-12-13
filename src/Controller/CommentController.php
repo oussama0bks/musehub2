@@ -7,6 +7,8 @@ use App\Entity\Comment;
 use App\Repository\CommentRepository;
 use App\Repository\PostRepository;
 use App\Service\ContentFilter;
+use App\Service\NotificationService;
+use App\Service\CommentModerationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,7 +24,9 @@ class CommentController extends AbstractController
         private EntityManagerInterface $em,
         private PostRepository $postRepository,
         private CommentRepository $commentRepository,
-        private ContentFilter $contentFilter
+        private ContentFilter $contentFilter,
+        private NotificationService $notificationService,
+        private CommentModerationService $moderationService
     ) {
     }
 
@@ -37,9 +41,18 @@ class CommentController extends AbstractController
 
         $user = $this->getUser();
         $data = json_decode($request->getContent(), true);
-        
+
         if (!isset($data['content'])) {
             return $this->json(['error' => 'content is required'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Check toxicity with Perspective API
+        $toxicityCheck = $this->moderationService->checkToxicity($data['content']);
+        if ($toxicityCheck['isToxic']) {
+            return $this->json([
+                'error' => $this->moderationService->getToxicityErrorMessage($toxicityCheck['score']),
+                'toxicity_score' => $toxicityCheck['score'],
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         // Filter content
@@ -89,6 +102,15 @@ class CommentController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['content'])) {
+            // Check toxicity with Perspective API
+            $toxicityCheck = $this->moderationService->checkToxicity($data['content']);
+            if ($toxicityCheck['isToxic']) {
+                return $this->json([
+                    'error' => $this->moderationService->getToxicityErrorMessage($toxicityCheck['score']),
+                    'toxicity_score' => $toxicityCheck['score'],
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
             // Filter content
             $filterResult = $this->contentFilter->filterContent($data['content']);
             if (!$filterResult['isValid']) {
@@ -106,6 +128,63 @@ class CommentController extends AbstractController
             'id' => $comment->getId(),
             'message' => 'Comment updated successfully'
         ]);
+    }
+
+    #[Route('/{id}/replies', name: 'api_posts_comments_reply', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function createReply(int $postId, int $id, Request $request): JsonResponse
+    {
+        $parentComment = $this->commentRepository->find($id);
+        if (!$parentComment) {
+            return $this->json(['error' => 'Parent comment not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Verify parent comment belongs to the post
+        if ($parentComment->getPost()->getId() !== $postId) {
+            return $this->json(['error' => 'Parent comment does not belong to this post'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = $this->getUser();
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['content'])) {
+            return $this->json(['error' => 'content is required'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Check toxicity with Perspective API
+        $toxicityCheck = $this->moderationService->checkToxicity($data['content']);
+        if ($toxicityCheck['isToxic']) {
+            return $this->json([
+                'error' => $this->moderationService->getToxicityErrorMessage($toxicityCheck['score']),
+                'toxicity_score' => $toxicityCheck['score'],
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Filter content
+        $filterResult = $this->contentFilter->filterContent($data['content']);
+        if (!$filterResult['isValid']) {
+            return $this->json([
+                'error' => 'Content validation failed',
+                'issues' => $filterResult['issues'],
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $reply = new Comment();
+        $reply->setPost($parentComment->getPost());
+        $reply->setCommenterUuid($user->getUuid());
+        $reply->setContent($filterResult['filteredContent']);
+        $reply->setParentComment($parentComment);
+
+        $this->em->persist($reply);
+        $this->em->flush();
+
+        // Create notification for comment reply
+        $this->notificationService->createCommentReplyNotification($parentComment, $reply, $user->getUuid());
+
+        return $this->json([
+            'id' => $reply->getId(),
+            'message' => 'Reply created successfully'
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'delete_comment', methods: ['DELETE'])]

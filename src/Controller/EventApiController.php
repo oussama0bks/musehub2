@@ -465,4 +465,3 @@ ICS;
         return $filename ?: 'event';
     }
 }
-

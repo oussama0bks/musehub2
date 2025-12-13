@@ -75,8 +75,8 @@
                             {% endif %}
                         </td>
                         <td>{{ user.createdAt|date('d/m/Y') }}</td>
-                        <td class="d-flex flex-wrap gap-2">
-                            <form action="{{ path('admin_users_toggle', {id: user.id}) }}" method="POST">
+                        <td class="d-flex gap-2 align-items-center flex-wrap flex-md-nowrap">
+                            <form action="{{ path('admin_users_toggle', {id: user.id}) }}" method="POST" class="d-inline">
                                 <input type="hidden" name="_token" value="{{ csrf_token('toggle_user_' ~ user.id) }}">
                                 <button type="submit" class="btn btn-sm btn-{{ user.isActive ? 'warning' : 'success' }}">
                                     {{ user.isActive ? 'Suspendre' : 'Activer' }}
@@ -85,7 +85,7 @@
                             <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="btn btn-sm btn-outline-primary">
                                 Modifier
                             </a>
-                            <form action="{{ path('admin_users_delete', {id: user.id}) }}" method="POST" onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                            <form action="{{ path('admin_users_delete', {id: user.id}) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cet utilisateur ?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">
                                     Supprimer

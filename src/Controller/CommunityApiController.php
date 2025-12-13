@@ -4,10 +4,13 @@ namespace App\Controller;
 
 use App\Entity\Comment;
 use App\Entity\Post;
+use App\Entity\PostReaction;
 use App\Repository\CommentRepository;
+use App\Repository\PostReactionRepository;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
 use App\Service\ContentFilter;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,7 +27,9 @@ class CommunityApiController extends AbstractController
         private CommentRepository $commentRepository,
         private EntityManagerInterface $em,
         private ContentFilter $contentFilter,
-        private UserRepository $userRepository
+        private UserRepository $userRepository,
+        private PostReactionRepository $postReactionRepository,
+        private NotificationService $notificationService
     ) {
     }
 
@@ -54,6 +59,7 @@ class CommunityApiController extends AbstractController
                 'content' => $post->getContent(),
                 'image_url' => $post->getImageUrl(),
                 'likes_count' => $post->getLikesCount(),
+                'dislikes_count' => $post->getDislikesCount(),
                 'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
                 'comments_count' => $post->getComments()->count(),
             ];
@@ -192,22 +198,31 @@ class CommunityApiController extends AbstractController
     }
 
     #[Route('/{id}/like', name: 'api_posts_like', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function like(int $id): JsonResponse
     {
-        $post = $this->postRepository->find($id);
-        if (!$post) {
-            return new JsonResponse(['error' => 'Post not found'], Response::HTTP_NOT_FOUND);
+        return $this->handleReaction($id, 'like');
+    }
+
+    #[Route('/{id}/dislike', name: 'api_posts_dislike', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function dislike(int $id): JsonResponse
+    {
+        return $this->handleReaction($id, 'dislike');
+    }
+
+    #[Route('/{id}/reaction', name: 'api_posts_reaction', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function react(int $id, Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?? [];
+        $type = $data['type'] ?? null;
+
+        if (!in_array($type, ['like', 'dislike'], true)) {
+            return new JsonResponse(['error' => 'Type de réaction invalide (like ou dislike attendu).'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Allow likes without authentication (public feature)
-        $post->incrementLikes();
-        $this->em->flush();
-
-        return new JsonResponse([
-            'id' => $post->getId(),
-            'likes_count' => $post->getLikesCount(),
-            'message' => 'Post liked successfully',
-        ]);
+        return $this->handleReaction($id, $type);
     }
 
     #[Route('/{id}/comments', name: 'api_posts_comment', methods: ['POST'])]
@@ -252,6 +267,11 @@ class CommunityApiController extends AbstractController
 
         $this->em->persist($comment);
         $this->em->flush();
+
+        // Create notification for post comment if user is authenticated
+        if ($user) {
+            $this->notificationService->createPostCommentNotification($post, $comment, $user->getUuid());
+        }
 
         $displayName = $user ? ($user->getUsername() ?: $user->getEmail()) : ($data['commenter_name'] ?? $this->formatGuestName($commenterUuid));
 
@@ -299,5 +319,68 @@ class CommunityApiController extends AbstractController
 
         return 'Utilisateur ' . substr($uuid, 0, 6);
     }
-}
 
+    private function handleReaction(int $postId, string $type): JsonResponse
+    {
+        $post = $this->postRepository->find($postId);
+        if (!$post) {
+            return new JsonResponse(['error' => 'Post not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Authentification requise'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $reaction = $this->postReactionRepository->findOneByPostAndUser($post, $user->getUuid());
+        $status = 'created';
+
+        if (!$reaction) {
+            $reaction = new PostReaction();
+            $reaction->setPost($post);
+            $reaction->setUserUuid($user->getUuid());
+            $reaction->setType($type);
+            if ($type === 'like') {
+                $post->incrementLikes();
+            } else {
+                $post->incrementDislikes();
+            }
+            $this->em->persist($reaction);
+        } elseif ($reaction->getType() === $type) {
+            $status = 'unchanged';
+        } else {
+            if ($reaction->getType() === 'like') {
+                $post->decrementLikes();
+            } else {
+                $post->decrementDislikes();
+            }
+
+            if ($type === 'like') {
+                $post->incrementLikes();
+            } else {
+                $post->incrementDislikes();
+            }
+
+            $reaction->setType($type);
+            $status = 'updated';
+        }
+
+        $this->em->flush();
+
+        // Create notification if this is a new reaction
+        if ($status === 'created') {
+            $this->notificationService->createPostReactionNotification($post, $user->getUuid(), $type);
+        }
+
+        return new JsonResponse([
+            'id' => $post->getId(),
+            'likes_count' => $post->getLikesCount(),
+            'dislikes_count' => $post->getDislikesCount(),
+            'active_reaction' => $reaction->getType(),
+            'status' => $status,
+            'message' => $status === 'unchanged'
+                ? 'Réaction déjà enregistrée.'
+                : 'Réaction mise à jour.',
+        ]);
+    }
+}

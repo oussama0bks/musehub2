@@ -126,6 +126,7 @@
                         {% if 'ROLE_ADMIN' in app.user.roles %}
                             <li class="nav-item"><a class="nav-link" href="{{ path('admin_dashboard') }}"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a></li>
                         {% endif %}
+                        <li class="nav-item"><a class="nav-link" href="{{ path('user_profile') }}"><i class="fas fa-user-circle me-1"></i>Mon profil</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ path('logout') }}"><i class="fas fa-sign-out-alt me-1"></i>Déconnexion</a></li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="{{ path('register') }}"><i class="fas fa-user-plus me-1"></i>Inscription</a></li>

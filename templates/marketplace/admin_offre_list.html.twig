@@ -1,0 +1,167 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Gestion des Offres - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-3">
+                <i class="fas fa-handshake"></i> Gestion des Offres
+            </h1>
+            <a href="{{ path('admin_offre_new') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouvelle Offre
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Total Offres</h5>
+                    <h2 class="text-primary">{{ stats.total }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">En Attente</h5>
+                    <h2 class="text-warning">{{ stats.en_attente }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Acceptées</h5>
+                    <h2 class="text-success">{{ stats.acceptees }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Refusées</h5>
+                    <h2 class="text-danger">{{ stats.refusees }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Statut</label>
+                    <select name="statut" class="form-select">
+                        <option value="all" {% if statut == 'all' %}selected{% endif %}>Tous les statuts</option>
+                        <option value="En attente" {% if statut == 'En attente' %}selected{% endif %}>En attente</option>
+                        <option value="Acceptée" {% if statut == 'Acceptée' %}selected{% endif %}>Acceptée</option>
+                        <option value="Refusée" {% if statut == 'Refusée' %}selected{% endif %}>Refusée</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Annonce</label>
+                    <select name="listing" class="form-select">
+                        <option value="">Toutes les annonces</option>
+                        {% for list in listings %}
+                            <option value="{{ list.id }}" {% if listing == list.id %}selected{% endif %}>
+                                #{{ list.id }} - {{ list.price }} €
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-filter"></i> Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Liste des offres -->
+    <div class="card">
+        {% if offres is empty %}
+            <div class="card-body text-center">
+                <p class="text-muted">Aucune offre trouvée.</p>
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Annonce</th>
+                            <th>Acheteur</th>
+                            <th>Prix Proposé</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for offre in offres %}
+                            <tr>
+                                <td><strong>#{{ offre.id }}</strong></td>
+                                <td>
+                                    <a href="{{ path('admin_offre_list', {listing: offre.listing.id}) }}">
+                                        Listing #{{ offre.listing.id }}
+                                    </a>
+                                </td>
+                                <td>{{ offre.utilisateur.email }}</td>
+                                <td><strong>{{ offre.prixPropose }} €</strong></td>
+                                <td>{{ offre.datePropose|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    {% if offre.statut == 'En attente' %}
+                                        <span class="badge bg-warning">En attente</span>
+                                    {% elseif offre.statut == 'Acceptée' %}
+                                        <span class="badge bg-success">Acceptée</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Refusée</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ path('admin_offre_edit', {id: offre.id}) }}" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i> Éditer
+                                        </a>
+
+                                        {% if offre.statut == 'En attente' %}
+                                            <form method="post" action="{{ path('admin_offre_accept', {id: offre.id}) }}" style="display: inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('accept_offre_' ~ offre.id) }}">
+                                                <button class="btn btn-sm btn-success" type="submit" title="Accepter">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+
+                                            <form method="post" action="{{ path('admin_offre_refuse', {id: offre.id}) }}" style="display: inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('refuse_offre_' ~ offre.id) }}">
+                                                <button class="btn btn-sm btn-danger" type="submit" title="Refuser">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+
+                                        <form method="post" action="{{ path('admin_offre_delete', {id: offre.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr ?')">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_offre_' ~ offre.id) }}">
+                                            <button class="btn btn-sm btn-danger" type="submit" title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

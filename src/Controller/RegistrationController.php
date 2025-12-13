@@ -28,6 +28,7 @@ class RegistrationController extends AbstractController
             'email' => $request->request->get('email', ''),
             'username' => $request->request->get('username', ''),
             'accept_terms' => (bool)$request->request->get('accept_terms', false),
+            'account_type' => $request->request->get('account_type', 'ROLE_USER'),
         ];
 
         if ($request->isMethod('POST')) {
@@ -36,11 +37,17 @@ class RegistrationController extends AbstractController
             $password = (string)$request->request->get('password');
             $confirmPassword = (string)$request->request->get('password_confirm');
             $acceptTerms = $request->request->getBoolean('accept_terms');
+            $accountType = (string)$request->request->get('account_type', 'ROLE_USER');
+            $validAccountTypes = ['ROLE_USER', 'ROLE_ARTIST'];
+            if (!in_array($accountType, $validAccountTypes, true)) {
+                $accountType = 'ROLE_USER';
+            }
 
             $formData = [
                 'email' => $email,
                 'username' => $username,
                 'accept_terms' => $acceptTerms,
+                'account_type' => $accountType,
             ];
 
             if (!$this->isCsrfTokenValid('register_form', (string)$request->request->get('_token'))) {
@@ -61,7 +68,7 @@ class RegistrationController extends AbstractController
                 $user = new User();
                 $user->setEmail($email);
                 $user->setUsername($username ?: null);
-                $user->setRoles(['ROLE_USER']);
+                $user->setRoles([$accountType]);
                 $hashedPassword = $passwordHasher->hashPassword($user, $password);
                 $user->setPassword($hashedPassword);
 

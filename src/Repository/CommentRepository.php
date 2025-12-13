@@ -20,7 +20,7 @@ class CommentRepository extends ServiceEntityRepository
         parent::__construct($registry, Comment::class);
     }
 
-    // MÃ©thodes personnalisÃ©es possibles ici
+    // Méthodes personnalisées possibles ici
 
     /*
     public function findByPostId(int $postId): array

@@ -13,6 +13,7 @@
             <th>Contenu</th>
             <th>Date de création</th>
             <th>Likes</th>
+            <th>Dislikes</th>
             <th>Nombre de commentaires</th>
             <th>Actions</th>
         </tr>
@@ -31,6 +32,7 @@
                 </td>
                 <td>{{ post.createdAt ? post.createdAt|date('d/m/Y H:i') : '' }}</td>
                 <td>{{ post.likesCount }}</td>
+                <td>{{ post.dislikesCount }}</td>
                 <td>{{ post.comments|length }}</td>
                 <td>
                     <a href="{{ path('post_show', {id: post.id}) }}">Voir côté utilisateur</a>
@@ -38,7 +40,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="7">Aucun post trouvé.</td>
+                <td colspan="8">Aucun post trouvé.</td>
             </tr>
         {% endfor %}
     </tbody>

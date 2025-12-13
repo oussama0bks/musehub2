@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Offres{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">
+                <i class="fas fa-user-check"></i> Mes Offres
+            </h1>
+
+            {% if offres is empty %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Vous n'avez pas encore fait d'offre.
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Annonce</th>
+                                <th>Prix Proposé</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for offre in offres %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('offre_by_listing', {id: offre.listing.id}) }}">
+                                            Listing #{{ offre.listing.id }}
+                                        </a>
+                                    </td>
+                                    <td><strong>{{ offre.prixPropose }} €</strong></td>
+                                    <td>{{ offre.datePropose|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        {% if offre.statut == 'En attente' %}
+                                            <span class="badge bg-warning">En attente</span>
+                                        {% elseif offre.statut == 'Acceptée' %}
+                                            <span class="badge bg-success">Acceptée</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Refusée</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('offre_show', {id: offre.id}) }}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                        {% if offre.statut == 'En attente' %}
+                                            <a href="{{ path('offre_edit', {id: offre.id}) }}" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i> Modifier
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+            <div class="mt-4">
+                <a href="{{ path('offre_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouvelle Offre
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

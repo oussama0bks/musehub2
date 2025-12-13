@@ -16,26 +16,38 @@ final class Version20251119120000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $table = $schema->getTable('user');
+        $schemaManager = $this->connection->createSchemaManager();
 
-        if (!$table->hasColumn('password_reset_token')) {
+        if (!$schemaManager->tablesExist(['user'])) {
+            return;
+        }
+
+        $columns = $schemaManager->listTableColumns('user');
+
+        if (!array_key_exists('password_reset_token', $columns)) {
             $this->addSql('ALTER TABLE user ADD password_reset_token VARCHAR(64) DEFAULT NULL');
         }
 
-        if (!$table->hasColumn('password_reset_requested_at')) {
+        if (!array_key_exists('password_reset_requested_at', $columns)) {
             $this->addSql('ALTER TABLE user ADD password_reset_requested_at DATETIME DEFAULT NULL');
         }
     }
 
     public function down(Schema $schema): void
     {
-        $table = $schema->getTable('user');
+        $schemaManager = $this->connection->createSchemaManager();
 
-        if ($table->hasColumn('password_reset_token')) {
+        if (!$schemaManager->tablesExist(['user'])) {
+            return;
+        }
+
+        $columns = $schemaManager->listTableColumns('user');
+
+        if (array_key_exists('password_reset_token', $columns)) {
             $this->addSql('ALTER TABLE user DROP password_reset_token');
         }
 
-        if ($table->hasColumn('password_reset_requested_at')) {
+        if (array_key_exists('password_reset_requested_at', $columns)) {
             $this->addSql('ALTER TABLE user DROP password_reset_requested_at');
         }
     }

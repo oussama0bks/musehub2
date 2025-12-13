@@ -16,7 +16,8 @@ class PostController extends AbstractController
     public function __construct(
         private EntityManagerInterface $em,
         private PostRepository $postRepository
-    ) {}
+    ) {
+    }
 
     #[Route('', methods: ['GET'])]
     public function list(): JsonResponse
@@ -30,6 +31,7 @@ class PostController extends AbstractController
             'image_url' => $post->getImageUrl(),
             'created_at' => $post->getCreatedAt()->format('c'),
             'likes_count' => $post->getLikesCount(),
+            'dislikes_count' => $post->getDislikesCount(),
         ], $posts);
 
         return $this->json($data);
@@ -140,5 +142,82 @@ class PostController extends AbstractController
         $this->em->flush();
 
         return $this->json(['id' => $comment->getId()], 201);
+    }
+
+    #[Route('/search', methods: ['GET'])]
+    public function search(Request $request): JsonResponse
+    {
+        $query = $request->query->get('query', '');
+
+        if (empty($query)) {
+            return $this->json(['error' => 'query parameter is required'], 400);
+        }
+
+        $limit = (int) $request->query->get('limit', 20);
+        $limit = min(max($limit, 1), 100); // Between 1 and 100
+
+        // Simple search using repository
+        $posts = $this->postRepository->createQueryBuilder('p')
+            ->where('p.content LIKE :query')
+            ->setParameter('query', '%' . $query . '%')
+            ->setMaxResults($limit)
+            ->orderBy('p.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $results = array_map(fn(Post $post) => [
+            'id' => $post->getId(),
+            'author_uuid' => $post->getAuthorUuid(),
+            'content' => $post->getContent(),
+            'image_url' => $post->getImageUrl(),
+            'created_at' => $post->getCreatedAt()->format('c'),
+            'likes_count' => $post->getLikesCount(),
+            'dislikes_count' => $post->getDislikesCount(),
+        ], $posts);
+
+        return $this->json($results);
+    }
+
+    #[Route('/{id}/upload-image', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function uploadImage(int $id, Request $request): JsonResponse
+    {
+        $post = $this->postRepository->find($id);
+        if (!$post) {
+            return $this->json(['error' => 'Post not found'], 404);
+        }
+
+        $user = $this->getUser();
+        // Only author or admin can upload image
+        if ($post->getAuthorUuid() !== $user->getUuid() && !$this->isGranted('ROLE_ADMIN')) {
+            return $this->json(['error' => 'Not authorized to upload image for this post'], 403);
+        }
+
+        $file = $request->files->get('image');
+        if (!$file) {
+            return $this->json(['error' => 'No image file provided'], 400);
+        }
+
+        try {
+            // Basic file upload handling
+            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/posts';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $filename = uniqid() . '.' . $file->guessExtension();
+            $file->move($uploadDir, $filename);
+            $imageUrl = '/uploads/posts/' . $filename;
+
+            $post->setImageUrl($imageUrl);
+            $this->em->flush();
+
+            return $this->json([
+                'message' => 'Image uploaded successfully',
+                'image_url' => $imageUrl,
+            ]);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
     }
 }
