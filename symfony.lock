@@ -35,7 +35,7 @@
             "./migrations/.gitignore"
         ]
     },
-<<<<<<< HEAD
+
     "lexik/jwt-authentication-bundle": {
         "version": "2.18",
         "recipe": {
@@ -60,8 +60,6 @@
             "./config/packages/http_discovery.yaml"
         ]
     },
-=======
->>>>>>> 776eda0bf4e6f00382b836d54d37240960c5e114
     "phpunit/phpunit": {
         "version": "11.5",
         "recipe": {

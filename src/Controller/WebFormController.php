@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Repository\PostCategoryRepository;
 
 #[Route('/web')]
 class WebFormController extends AbstractController
@@ -37,7 +38,8 @@ class WebFormController extends AbstractController
         private EventRepository $eventRepository,
         private ParticipantRepository $participantRepository,
         private ContentFilter $contentFilter,
-        private CommentModerationService $moderationService
+        private CommentModerationService $moderationService,
+        private PostCategoryRepository $postCategoryRepository,
     ) {
     }
 

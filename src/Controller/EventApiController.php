@@ -29,7 +29,7 @@ class EventApiController extends AbstractController
     #[Route('/search', name: 'api_events_search', methods: ['GET'])]
     public function search(Request $request): JsonResponse
     {
-        // RÃ©cupÃ©rer les paramÃ¨tres de recherche
+        // Récupérer les paramètres de recherche
         $query = $request->query->get('q', '');
         $location = $request->query->get('location', '');
         $dateFrom = $request->query->get('date_from', '');
@@ -41,7 +41,7 @@ class EventApiController extends AbstractController
         $limit = min(100, max(1, (int)$request->query->get('limit', 20)));
         $offset = ($page - 1) * $limit;
 
-        // Construire la requÃªte
+        // Construire la requête
         $qb = $this->eventRepository->createQueryBuilder('e');
 
         // Filtrer par recherche texte (titre + description)
@@ -59,7 +59,7 @@ class EventApiController extends AbstractController
             $qb->andWhere('e.location = :location')->setParameter('location', $location);
         }
 
-        // Filtrer par date de dÃ©but
+        // Filtrer par date de début
         if ($dateFrom) {
             $qb->andWhere('e.dateTime >= :from')->setParameter('from', new \DateTimeImmutable($dateFrom));
         }
@@ -69,7 +69,7 @@ class EventApiController extends AbstractController
             $qb->andWhere('e.dateTime <= :to')->setParameter('to', new \DateTimeImmutable($dateTo));
         }
 
-        // Filtrer par type d'Ã©vÃ©nement
+        // Filtrer par type d'événement
         if ($type) {
             $qb->leftJoin('e.eventType', 'et')
                ->andWhere('et.name = :type')->setParameter('type', $type);
@@ -105,7 +105,7 @@ class EventApiController extends AbstractController
                      ->getQuery()
                      ->getResult();
 
-        // Formater les rÃ©sultats
+        // Formater les résultats
         $data = array_map(function (Event $event) {
             return [
                 'id' => $event->getId(),
@@ -145,14 +145,14 @@ class EventApiController extends AbstractController
     #[Route('/map', name: 'api_events_map', methods: ['GET'])]
     public function map(Request $request): JsonResponse
     {
-        // ParamÃ¨tres optionnels
+        // Paramètres optionnels
         $location = $request->query->get('location', '');
         $isActive = $request->query->get('is_active', '1') === '1';
         $limit = min(500, max(1, (int)$request->query->get('limit', 100)));
 
         $qb = $this->eventRepository->createQueryBuilder('e');
 
-        // RÃ©cupÃ©rer seulement les Ã©vÃ©nements avec coordonnÃ©es GPS
+        // Récupérer seulement les événements avec coordonnées GPS
         $qb->andWhere('e.latitude IS NOT NULL')
            ->andWhere('e.longitude IS NOT NULL');
 
@@ -171,7 +171,7 @@ class EventApiController extends AbstractController
 
         $events = $qb->getQuery()->getResult();
 
-        // Formater les rÃ©sultats pour une carte
+        // Formater les résultats pour une carte
         $data = array_map(function (Event $event) {
             return [
                 'id' => $event->getId(),
@@ -206,7 +206,7 @@ class EventApiController extends AbstractController
             return new JsonResponse(['error' => 'Event not found'], 404);
         }
 
-        // VÃ©rifier si l'Ã©vÃ©nement a des coordonnÃ©es GPS
+        // Vérifier si l'événement a des coordonnées GPS
         if ($event->getLatitude() === null || $event->getLongitude() === null) {
             return new JsonResponse([
                 'error' => 'Event has no GPS coordinates',
@@ -352,13 +352,13 @@ class EventApiController extends AbstractController
         $participant = new Participant();
         $participant->setEventUuid($event->getUuid());
         $participant->setParticipantUuid($user->getUuid());
-        // Le statut par dÃ©faut est 'pending' - sera confirmÃ© par l'admin
+        // Le statut par défaut est 'pending' - sera confirmé par l'admin
 
         $this->em->persist($participant);
         $this->em->flush();
 
         return new JsonResponse([
-            'message' => 'Inscription enregistrÃ©e. En attente de confirmation par l\'organisateur.',
+            'message' => 'Inscription enregistrée. En attente de confirmation par l\'organisateur.',
             'status' => 'pending'
         ], Response::HTTP_CREATED);
     }
@@ -393,10 +393,10 @@ class EventApiController extends AbstractController
             return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
         }
 
-        // GÃ©nÃ©rer le contenu iCalendar
+        // Générer le contenu iCalendar
         $ics = $this->generateIcsContent($event);
 
-        // CrÃ©er une rÃ©ponse binaire stricte
+        // Créer une réponse binaire stricte
         $response = new Response();
         $response->setContent($ics);
         $response->headers->set('Content-Type', 'text/calendar');
@@ -407,7 +407,7 @@ class EventApiController extends AbstractController
     }
 
     /**
-     * GÃ©nÃ¨re un fichier iCalendar RFC 5545 compliant
+     * Génère un fichier iCalendar RFC 5545 compliant
      */
     private function generateIcsContent(Event $event): string
     {
@@ -461,7 +461,7 @@ ICS;
      */
     private function sanitizeFilename(string $filename): string
     {
-        // Remplacer les caractÃ¨res non alphanumÃ©riques
+        // Remplacer les caractères non alphanumériques
         $filename = preg_replace('/[^a-zA-Z0-9._-]/', '_', $filename);
         $filename = substr($filename, 0, 100); // Limiter la longueur
         
