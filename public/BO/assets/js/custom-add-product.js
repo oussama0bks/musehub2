@@ -16,7 +16,7 @@
       theme: "snow",
       placeholder: "Enter your messages...",
     });
-    // =====================================================================
+
     function openAlert() {
       var alertBox = document.getElementById("alertBox");
       alertBox.style.display = "block";

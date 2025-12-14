@@ -1,6 +1,6 @@
-/**=====================
+/**
     Custom Dropzone  Start
-==========================**/
+=====**/
 var DropzoneExample = (function () {
   var DropzoneDemos = function () {
     Dropzone.options.singleFileUpload = {
@@ -52,6 +52,6 @@ var DropzoneExample = (function () {
 })();
 DropzoneExample.init();
 
-/**=====================
+/**
     Custom Dropzone Ends
-==========================**/
+=====**/

@@ -100,9 +100,9 @@
     });
   });
 
-  /*=====================
+  /*
   Email hide/show js
-==========================*/
+=====*/
   const listItems1 = document.querySelectorAll(".inbox-data");
 
   listItems1.forEach(function (item) {
@@ -127,9 +127,9 @@
     });
   });
 
-  /*======================
+  /*=
  Delete Quantity Item js
-=======================*/
+==*/
   const InboxData = document.querySelectorAll(".inbox-data");
   InboxData?.forEach((el) => {
     const deleteIcon = el.querySelector(".trash-3");

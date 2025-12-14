@@ -37,7 +37,7 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
 
     protected function doGetParent(array $context): bool|string|Template|TemplateWrapper
     {
-        // line 1
+        // line 2
         return "front/base.html.twig";
     }
 
@@ -50,7 +50,7 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
         $__internal_6f47bbe9983af81f1e7450e9a3e3768f = $this->extensions["Symfony\\Bridge\\Twig\\Extension\\ProfilerExtension"];
         $__internal_6f47bbe9983af81f1e7450e9a3e3768f->enter($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "template", "front/artworks.html.twig"));
 
-        $this->parent = $this->load("front/base.html.twig", 1);
+        $this->parent = $this->load("front/base.html.twig", 2);
         yield from $this->parent->unwrap()->yield($context, array_merge($this->blocks, $blocks));
         
         $__internal_5a27a8ba21ca79b61932376b2fa922d2->leave($__internal_5a27a8ba21ca79b61932376b2fa922d2_prof);
@@ -60,7 +60,7 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
 
     }
 
-    // line 3
+    // line 4
     /**
      * @return iterable<null|scalar|\Stringable>
      */
@@ -83,7 +83,7 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
         yield from [];
     }
 
-    // line 5
+    // line 6
     /**
      * @return iterable<null|scalar|\Stringable>
      */
@@ -96,8 +96,17 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
         $__internal_6f47bbe9983af81f1e7450e9a3e3768f = $this->extensions["Symfony\\Bridge\\Twig\\Extension\\ProfilerExtension"];
         $__internal_6f47bbe9983af81f1e7450e9a3e3768f->enter($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "block", "body"));
 
-        // line 6
+        // line 7
         yield "<div class=\"container my-5\">
+    <div class=\"mb-4\">
+        <a href=\"";
+        // line 9
+        yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("home");
+        yield "\" class=\"btn btn-outline-secondary\">
+            <i class=\"fas fa-arrow-left me-2\"></i>Retour à l'accueil
+        </a>
+    </div>
+
     <div class=\"text-center mb-5\">
         <h1 class=\"display-4 fw-bold mb-3\">Galerie d'Œuvres</h1>
         <p class=\"lead text-muted\">Découvrez notre collection d'œuvres d'art</p>
@@ -105,16 +114,16 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
 
     <!-- Formulaire de création d'œuvre -->
     ";
-        // line 13
-        if ((CoreExtension::getAttribute($this->env, $this->source, (isset($context["app"]) || array_key_exists("app", $context) ? $context["app"] : (function () { throw new RuntimeError('Variable "app" does not exist.', 13, $this->source); })()), "user", [], "any", false, false, false, 13) && (CoreExtension::inFilter("ROLE_ARTIST", CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, (isset($context["app"]) || array_key_exists("app", $context) ? $context["app"] : (function () { throw new RuntimeError('Variable "app" does not exist.', 13, $this->source); })()), "user", [], "any", false, false, false, 13), "roles", [], "any", false, false, false, 13)) || CoreExtension::inFilter("ROLE_ADMIN", CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, (isset($context["app"]) || array_key_exists("app", $context) ? $context["app"] : (function () { throw new RuntimeError('Variable "app" does not exist.', 13, $this->source); })()), "user", [], "any", false, false, false, 13), "roles", [], "any", false, false, false, 13))))) {
-            // line 14
+        // line 20
+        if ((CoreExtension::getAttribute($this->env, $this->source, (isset($context["app"]) || array_key_exists("app", $context) ? $context["app"] : (function () { throw new RuntimeError('Variable "app" does not exist.', 20, $this->source); })()), "user", [], "any", false, false, false, 20) && (CoreExtension::inFilter("ROLE_ARTIST", CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, (isset($context["app"]) || array_key_exists("app", $context) ? $context["app"] : (function () { throw new RuntimeError('Variable "app" does not exist.', 20, $this->source); })()), "user", [], "any", false, false, false, 20), "roles", [], "any", false, false, false, 20)) || CoreExtension::inFilter("ROLE_ADMIN", CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, (isset($context["app"]) || array_key_exists("app", $context) ? $context["app"] : (function () { throw new RuntimeError('Variable "app" does not exist.', 20, $this->source); })()), "user", [], "any", false, false, false, 20), "roles", [], "any", false, false, false, 20))))) {
+            // line 21
             yield "    <div class=\"card mb-5\">
         <div class=\"card-body\">
             <h5 class=\"card-title mb-3\">
                 <i class=\"fas fa-plus-circle me-2\"></i>Ajouter une nouvelle œuvre
             </h5>
             <form action=\"";
-            // line 19
+            // line 26
             yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("web_artworks_create");
             yield "\" method=\"POST\" enctype=\"multipart/form-data\" id=\"artworkForm\">
                 <div class=\"row\">
@@ -134,7 +143,7 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
                 <div class=\"row\">
                     <div class=\"col-md-6 mb-3\">
                         <label class=\"form-label\">
-                            <i class=\"fas fa-upload me-2\"></i>Image de l'œuvre (depuis votre PC)
+                            <i class=\"fas fa-upload me-2\"></i>Image de l'œuvre (depuis votre PC) <span class=\"text-danger\">*</span>
                         </label>
                         <input type=\"file\" class=\"form-control\" name=\"image_file\" accept=\"image/*\" id=\"image_file_input\">
                         <small class=\"form-text text-muted\">Formats acceptés: JPG, PNG, GIF, WEBP (max 5MB)</small>
@@ -143,26 +152,26 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
                         </div>
                     </div>
                     <div class=\"col-md-6 mb-3\">
-                        <label class=\"form-label\">Catégorie</label>
-                        <select class=\"form-select\" name=\"category_id\">
+                        <label class=\"form-label\">Catégorie <span class=\"text-danger\">*</span></label>
+                        <select class=\"form-select\" name=\"category_id\" required>
                             <option value=\"\">Aucune catégorie</option>
                             ";
-            // line 49
+            // line 56
             $context['_parent'] = $context;
-            $context['_seq'] = CoreExtension::ensureTraversable((isset($context["categories"]) || array_key_exists("categories", $context) ? $context["categories"] : (function () { throw new RuntimeError('Variable "categories" does not exist.', 49, $this->source); })()));
+            $context['_seq'] = CoreExtension::ensureTraversable((isset($context["categories"]) || array_key_exists("categories", $context) ? $context["categories"] : (function () { throw new RuntimeError('Variable "categories" does not exist.', 56, $this->source); })()));
             foreach ($context['_seq'] as $context["_key"] => $context["category"]) {
-                // line 50
+                // line 57
                 yield "                                <option value=\"";
-                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["category"], "id", [], "any", false, false, false, 50), "html", null, true);
+                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["category"], "id", [], "any", false, false, false, 57), "html", null, true);
                 yield "\">";
-                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["category"], "name", [], "any", false, false, false, 50), "html", null, true);
+                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["category"], "name", [], "any", false, false, false, 57), "html", null, true);
                 yield "</option>
                             ";
             }
             $_parent = $context['_parent'];
             unset($context['_seq'], $context['_key'], $context['category'], $context['_parent']);
             $context = array_intersect_key($context, $_parent) + $_parent;
-            // line 52
+            // line 59
             yield "                        </select>
                     </div>
                 </div>
@@ -240,119 +249,237 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
     </div>
     ";
         }
-        // line 128
+        // line 135
         yield "
-    <div class=\"row g-4\">
-        ";
-        // line 130
+    <div class=\"row\">
+        <!-- Sidebar Filters -->
+        <div class=\"col-lg-3 mb-4\">
+            <div class=\"card shadow-sm border-0\">
+                <div class=\"card-header bg-white\">
+                    <h5 class=\"mb-0\"><i class=\"fas fa-filter me-2\"></i>Filtres</h5>
+                </div>
+                <div class=\"card-body\">
+                    <form action=\"";
+        // line 144
+        yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("artworks");
+        yield "\" method=\"GET\">
+                        <div class=\"mb-3\">
+                            <label class=\"form-label fw-bold\">Catégorie</label>
+                            <select name=\"category\" class=\"form-select\">
+                                <option value=\"\">Toutes les catégories</option>
+                                ";
+        // line 149
         $context['_parent'] = $context;
-        $context['_seq'] = CoreExtension::ensureTraversable((isset($context["artworks"]) || array_key_exists("artworks", $context) ? $context["artworks"] : (function () { throw new RuntimeError('Variable "artworks" does not exist.', 130, $this->source); })()));
-        $context['_iterated'] = false;
-        foreach ($context['_seq'] as $context["_key"] => $context["artwork"]) {
-            // line 131
-            yield "        <div class=\"col-md-6 col-lg-4\">
-            <div class=\"card h-100\">
-                ";
-            // line 133
-            if ((($tmp = CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "imageUrl", [], "any", false, false, false, 133)) && $tmp instanceof Markup ? (string) $tmp : $tmp)) {
-                // line 134
-                yield "                    <img src=\"";
-                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "imageUrl", [], "any", false, false, false, 134), "html", null, true);
-                yield "\" alt=\"";
-                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "title", [], "any", false, false, false, 134), "html", null, true);
-                yield "\" class=\"artwork-image\">
-                ";
-            } else {
-                // line 136
-                yield "                    <div class=\"artwork-image bg-secondary d-flex align-items-center justify-content-center text-white\">
-                        <i class=\"fas fa-image fa-3x\"></i>
-                    </div>
-                ";
-            }
-            // line 140
-            yield "                <div class=\"card-body\">
-                    <h5 class=\"card-title\">";
-            // line 141
-            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "title", [], "any", false, false, false, 141), "html", null, true);
-            yield "</h5>
-                    <p class=\"text-muted small mb-2\">
-                        ";
-            // line 143
-            if ((($tmp = CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "category", [], "any", false, false, false, 143)) && $tmp instanceof Markup ? (string) $tmp : $tmp)) {
-                // line 144
-                yield "                            <span class=\"badge bg-info\">";
-                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "category", [], "any", false, false, false, 144), "name", [], "any", false, false, false, 144), "html", null, true);
-                yield "</span>
-                        ";
-            }
-            // line 146
-            yield "                        <span class=\"badge bg-";
-            yield (((CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "status", [], "any", false, false, false, 146) == "visible")) ? ("success") : ("secondary"));
-            yield "\">
-                            ";
-            // line 147
-            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "status", [], "any", false, false, false, 147), "html", null, true);
-            yield "
-                        </span>
-                    </p>
-                    ";
+        $context['_seq'] = CoreExtension::ensureTraversable((isset($context["categories"]) || array_key_exists("categories", $context) ? $context["categories"] : (function () { throw new RuntimeError('Variable "categories" does not exist.', 149, $this->source); })()));
+        foreach ($context['_seq'] as $context["_key"] => $context["category"]) {
             // line 150
-            if ((($tmp = CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "description", [], "any", false, false, false, 150)) && $tmp instanceof Markup ? (string) $tmp : $tmp)) {
-                // line 151
-                yield "                        <p class=\"card-text\">";
-                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(Twig\Extension\CoreExtension::slice($this->env->getCharset(), CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "description", [], "any", false, false, false, 151), 0, 150), "html", null, true);
-                if ((Twig\Extension\CoreExtension::length($this->env->getCharset(), CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "description", [], "any", false, false, false, 151)) > 150)) {
-                    yield "...";
-                }
-                yield "</p>
-                    ";
-            }
-            // line 153
-            yield "                    <div class=\"d-flex justify-content-between align-items-center mt-3\">
-                        ";
-            // line 154
-            if ((($tmp = CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "price", [], "any", false, false, false, 154)) && $tmp instanceof Markup ? (string) $tmp : $tmp)) {
-                // line 155
-                yield "                            <span class=\"text-primary fw-bold fs-5\">";
-                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "price", [], "any", false, false, false, 155), "html", null, true);
-                yield " €</span>
-                        ";
-            } else {
-                // line 157
-                yield "                            <span class=\"text-muted\">Prix sur demande</span>
-                        ";
-            }
-            // line 159
-            yield "                        <a href=\"";
-            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape($this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("artwork_show", ["id" => CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "id", [], "any", false, false, false, 159)]), "html", null, true);
-            yield "\" class=\"btn btn-sm btn-primary\">Voir détails</a>
-                    </div>
+            yield "                                    <option value=\"";
+            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["category"], "name", [], "any", false, false, false, 150), "html", null, true);
+            yield "\" ";
+            yield (((CoreExtension::getAttribute($this->env, $this->source, (isset($context["filters"]) || array_key_exists("filters", $context) ? $context["filters"] : (function () { throw new RuntimeError('Variable "filters" does not exist.', 150, $this->source); })()), "category", [], "any", false, false, false, 150) == CoreExtension::getAttribute($this->env, $this->source, $context["category"], "name", [], "any", false, false, false, 150))) ? ("selected") : (""));
+            yield ">
+                                        ";
+            // line 151
+            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["category"], "name", [], "any", false, false, false, 151), "html", null, true);
+            yield "
+                                    </option>
+                                ";
+        }
+        $_parent = $context['_parent'];
+        unset($context['_seq'], $context['_key'], $context['category'], $context['_parent']);
+        $context = array_intersect_key($context, $_parent) + $_parent;
+        // line 154
+        yield "                            </select>
+                        </div>
+                        
+                        <div class=\"mb-3\">
+                            <label class=\"form-label fw-bold\">Prix (€)</label>
+                            <div class=\"d-flex gap-2\">
+                                <input type=\"number\" name=\"min_price\" class=\"form-control\" placeholder=\"Min\" value=\"";
+        // line 160
+        yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, (isset($context["filters"]) || array_key_exists("filters", $context) ? $context["filters"] : (function () { throw new RuntimeError('Variable "filters" does not exist.', 160, $this->source); })()), "min_price", [], "any", false, false, false, 160), "html", null, true);
+        yield "\">
+                                <input type=\"number\" name=\"max_price\" class=\"form-control\" placeholder=\"Max\" value=\"";
+        // line 161
+        yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, (isset($context["filters"]) || array_key_exists("filters", $context) ? $context["filters"] : (function () { throw new RuntimeError('Variable "filters" does not exist.', 161, $this->source); })()), "max_price", [], "any", false, false, false, 161), "html", null, true);
+        yield "\">
+                            </div>
+                        </div>
+
+                        <div class=\"mb-3\">
+                            <label class=\"form-label fw-bold\">Trier par</label>
+                            <select name=\"sort\" class=\"form-select mb-2\">
+                                <option value=\"newest\" ";
+        // line 168
+        yield (((CoreExtension::getAttribute($this->env, $this->source, (isset($context["filters"]) || array_key_exists("filters", $context) ? $context["filters"] : (function () { throw new RuntimeError('Variable "filters" does not exist.', 168, $this->source); })()), "sort", [], "any", false, false, false, 168) == "newest")) ? ("selected") : (""));
+        yield ">Plus récents</option>
+                                <option value=\"price\" ";
+        // line 169
+        yield (((CoreExtension::getAttribute($this->env, $this->source, (isset($context["filters"]) || array_key_exists("filters", $context) ? $context["filters"] : (function () { throw new RuntimeError('Variable "filters" does not exist.', 169, $this->source); })()), "sort", [], "any", false, false, false, 169) == "price")) ? ("selected") : (""));
+        yield ">Prix</option>
+                                <option value=\"likes\" ";
+        // line 170
+        yield (((CoreExtension::getAttribute($this->env, $this->source, (isset($context["filters"]) || array_key_exists("filters", $context) ? $context["filters"] : (function () { throw new RuntimeError('Variable "filters" does not exist.', 170, $this->source); })()), "sort", [], "any", false, false, false, 170) == "likes")) ? ("selected") : (""));
+        yield ">Popularité</option>
+                            </select>
+                            <select name=\"direction\" class=\"form-select\">
+                                <option value=\"DESC\" ";
+        // line 173
+        yield (((CoreExtension::getAttribute($this->env, $this->source, (isset($context["filters"]) || array_key_exists("filters", $context) ? $context["filters"] : (function () { throw new RuntimeError('Variable "filters" does not exist.', 173, $this->source); })()), "direction", [], "any", false, false, false, 173) == "DESC")) ? ("selected") : (""));
+        yield ">Décroissant</option>
+                                <option value=\"ASC\" ";
+        // line 174
+        yield (((CoreExtension::getAttribute($this->env, $this->source, (isset($context["filters"]) || array_key_exists("filters", $context) ? $context["filters"] : (function () { throw new RuntimeError('Variable "filters" does not exist.', 174, $this->source); })()), "direction", [], "any", false, false, false, 174) == "ASC")) ? ("selected") : (""));
+        yield ">Croissant</option>
+                            </select>
+                        </div>
+
+                        <div class=\"d-grid gap-2\">
+                            <button type=\"submit\" class=\"btn btn-primary\">Appliquer</button>
+                            <a href=\"";
+        // line 180
+        yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("artworks");
+        yield "\" class=\"btn btn-outline-secondary\">Réinitialiser</a>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </div>
-        ";
-            $context['_iterated'] = true;
-        }
-        // line 164
-        if (!$context['_iterated']) {
-            // line 165
-            yield "        <div class=\"col-12\">
-            <div class=\"alert alert-info text-center\">
-                <i class=\"fas fa-info-circle me-2\"></i>Aucune œuvre disponible pour le moment.
-                <br>
+            
+            <div class=\"d-grid mt-3\">
                 <a href=\"";
-            // line 169
-            yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("admin_dashboard");
-            yield "\" class=\"btn btn-primary mt-3\">Ajouter une œuvre (Admin)</a>
+        // line 187
+        yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("harvard_collection");
+        yield "\" class=\"btn btn-danger text-white shadow-sm\">
+                    <i class=\"fas fa-university me-2\"></i>Collection Harvard
+                </a>
             </div>
         </div>
-        ";
+
+        <!-- Artwork Grid -->
+        <div class=\"col-lg-9\">
+            <div class=\"row g-4\">
+                ";
+        // line 196
+        $context['_parent'] = $context;
+        $context['_seq'] = CoreExtension::ensureTraversable((isset($context["artworks"]) || array_key_exists("artworks", $context) ? $context["artworks"] : (function () { throw new RuntimeError('Variable "artworks" does not exist.', 196, $this->source); })()));
+        $context['_iterated'] = false;
+        foreach ($context['_seq'] as $context["_key"] => $context["artwork"]) {
+            // line 197
+            yield "                <div class=\"col-md-6 col-lg-4\">
+                    <div class=\"card h-100 shadow-sm border-0 transition-hover\">
+                        <div class=\"position-relative\">
+                            ";
+            // line 200
+            if ((($tmp = CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "imageUrl", [], "any", false, false, false, 200)) && $tmp instanceof Markup ? (string) $tmp : $tmp)) {
+                // line 201
+                yield "                                <img src=\"";
+                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "imageUrl", [], "any", false, false, false, 201), "html", null, true);
+                yield "\" alt=\"";
+                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "title", [], "any", false, false, false, 201), "html", null, true);
+                yield "\" class=\"card-img-top artwork-image\" style=\"height: 250px; object-fit: cover;\">
+                            ";
+            } else {
+                // line 203
+                yield "                                <div class=\"card-img-top bg-light d-flex align-items-center justify-content-center\" style=\"height: 250px;\">
+                                    <i class=\"fas fa-image fa-3x text-muted\"></i>
+                                </div>
+                            ";
+            }
+            // line 207
+            yield "                            
+                            <!-- Like Button Overlay -->
+                            <button class=\"btn btn-light rounded-circle position-absolute top-0 end-0 m-2 shadow-sm like-btn\" 
+                                    data-artwork-id=\"";
+            // line 210
+            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "id", [], "any", false, false, false, 210), "html", null, true);
+            yield "\"
+                                    data-url=\"";
+            // line 211
+            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape($this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("api_artworks_like", ["id" => CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "id", [], "any", false, false, false, 211)]), "html", null, true);
+            yield "\"
+                                    title=\"J'aime\">
+                                <i class=\"far fa-heart text-danger\"></i>
+                            </button>
+                        </div>
+                        
+                        <div class=\"card-body\">
+                            <div class=\"d-flex justify-content-between align-items-start mb-2\">
+                                <h5 class=\"card-title mb-0 text-truncate\">";
+            // line 219
+            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "title", [], "any", false, false, false, 219), "html", null, true);
+            yield "</h5>
+                                <span class=\"badge bg-light text-dark border\">
+                                    <i class=\"fas fa-heart text-danger me-1\"></i>
+                                    <span class=\"likes-count\">";
+            // line 222
+            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "likesCount", [], "any", false, false, false, 222), "html", null, true);
+            yield "</span>
+                                </span>
+                            </div>
+                            
+                            <p class=\"text-muted small mb-2\">
+                                ";
+            // line 227
+            if ((($tmp = CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "category", [], "any", false, false, false, 227)) && $tmp instanceof Markup ? (string) $tmp : $tmp)) {
+                // line 228
+                yield "                                    <span class=\"badge bg-info bg-opacity-10 text-info\">";
+                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "category", [], "any", false, false, false, 228), "name", [], "any", false, false, false, 228), "html", null, true);
+                yield "</span>
+                                ";
+            }
+            // line 230
+            yield "                            </p>
+                            
+                            ";
+            // line 232
+            if ((($tmp = CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "description", [], "any", false, false, false, 232)) && $tmp instanceof Markup ? (string) $tmp : $tmp)) {
+                // line 233
+                yield "                                <p class=\"card-text small text-muted\">";
+                yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(Twig\Extension\CoreExtension::slice($this->env->getCharset(), CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "description", [], "any", false, false, false, 233), 0, 100), "html", null, true);
+                yield "...</p>
+                            ";
+            }
+            // line 235
+            yield "                        </div>
+                        
+                        <div class=\"card-footer bg-white border-top-0 d-flex justify-content-between align-items-center pb-3\">
+                            <span class=\"fw-bold text-primary\">";
+            // line 238
+            yield (((($tmp = CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "price", [], "any", false, false, false, 238)) && $tmp instanceof Markup ? (string) $tmp : $tmp)) ? ($this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape((CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "price", [], "any", false, false, false, 238) . " €"), "html", null, true)) : ("Sur demande"));
+            yield "</span>
+                            <a href=\"";
+            // line 239
+            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape($this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("artwork_show", ["id" => CoreExtension::getAttribute($this->env, $this->source, $context["artwork"], "id", [], "any", false, false, false, 239)]), "html", null, true);
+            yield "\" class=\"btn btn-sm btn-outline-primary rounded-pill px-3\">Voir</a>
+                        </div>
+                    </div>
+                </div>
+                ";
+            $context['_iterated'] = true;
+        }
+        // line 243
+        if (!$context['_iterated']) {
+            // line 244
+            yield "                <div class=\"col-12\">
+                    <div class=\"alert alert-info text-center py-5\">
+                        <i class=\"fas fa-search fa-3x mb-3 text-info\"></i>
+                        <h5>Aucune œuvre trouvée</h5>
+                        <p>Essayez de modifier vos filtres de recherche.</p>
+                        <a href=\"";
+            // line 249
+            yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("artworks");
+            yield "\" class=\"btn btn-primary mt-2\">Voir tout</a>
+                    </div>
+                </div>
+                ";
         }
         $_parent = $context['_parent'];
         unset($context['_seq'], $context['_key'], $context['artwork'], $context['_parent'], $context['_iterated']);
         $context = array_intersect_key($context, $_parent) + $_parent;
-        // line 173
-        yield "    </div>
+        // line 253
+        yield "            </div>
+        </div>
+    </div>
 </div>
 ";
         
@@ -385,17 +512,24 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
      */
     public function getDebugInfo(): array
     {
-        return array (  355 => 173,  345 => 169,  339 => 165,  337 => 164,  326 => 159,  322 => 157,  316 => 155,  314 => 154,  311 => 153,  302 => 151,  300 => 150,  294 => 147,  289 => 146,  283 => 144,  281 => 143,  276 => 141,  273 => 140,  267 => 136,  259 => 134,  257 => 133,  253 => 131,  248 => 130,  244 => 128,  166 => 52,  155 => 50,  151 => 49,  118 => 19,  111 => 14,  109 => 13,  100 => 6,  87 => 5,  64 => 3,  41 => 1,);
+        return array (  480 => 253,  470 => 249,  463 => 244,  461 => 243,  452 => 239,  448 => 238,  443 => 235,  437 => 233,  435 => 232,  431 => 230,  425 => 228,  423 => 227,  415 => 222,  409 => 219,  398 => 211,  394 => 210,  389 => 207,  383 => 203,  375 => 201,  373 => 200,  368 => 197,  363 => 196,  351 => 187,  341 => 180,  332 => 174,  328 => 173,  322 => 170,  318 => 169,  314 => 168,  304 => 161,  300 => 160,  292 => 154,  283 => 151,  276 => 150,  272 => 149,  264 => 144,  253 => 135,  175 => 59,  164 => 57,  160 => 56,  127 => 26,  120 => 21,  118 => 20,  104 => 9,  100 => 7,  87 => 6,  64 => 4,  41 => 2,);
     }
 
     public function getSourceContext(): Source
     {
-        return new Source("{% extends 'front/base.html.twig' %}
+        return new Source("
+{% extends 'front/base.html.twig' %}
 
 {% block title %}Œuvres - MuseHub{% endblock %}
 
 {% block body %}
 <div class=\"container my-5\">
+    <div class=\"mb-4\">
+        <a href=\"{{ path('home') }}\" class=\"btn btn-outline-secondary\">
+            <i class=\"fas fa-arrow-left me-2\"></i>Retour à l'accueil
+        </a>
+    </div>
+
     <div class=\"text-center mb-5\">
         <h1 class=\"display-4 fw-bold mb-3\">Galerie d'Œuvres</h1>
         <p class=\"lead text-muted\">Découvrez notre collection d'œuvres d'art</p>
@@ -426,7 +560,7 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
                 <div class=\"row\">
                     <div class=\"col-md-6 mb-3\">
                         <label class=\"form-label\">
-                            <i class=\"fas fa-upload me-2\"></i>Image de l'œuvre (depuis votre PC)
+                            <i class=\"fas fa-upload me-2\"></i>Image de l'œuvre (depuis votre PC) <span class=\"text-danger\">*</span>
                         </label>
                         <input type=\"file\" class=\"form-control\" name=\"image_file\" accept=\"image/*\" id=\"image_file_input\">
                         <small class=\"form-text text-muted\">Formats acceptés: JPG, PNG, GIF, WEBP (max 5MB)</small>
@@ -435,8 +569,8 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
                         </div>
                     </div>
                     <div class=\"col-md-6 mb-3\">
-                        <label class=\"form-label\">Catégorie</label>
-                        <select class=\"form-select\" name=\"category_id\">
+                        <label class=\"form-label\">Catégorie <span class=\"text-danger\">*</span></label>
+                        <select class=\"form-select\" name=\"category_id\" required>
                             <option value=\"\">Aucune catégorie</option>
                             {% for category in categories %}
                                 <option value=\"{{ category.id }}\">{{ category.name }}</option>
@@ -518,55 +652,128 @@ class __TwigTemplate_996b3bab3dd918295a78cfb2de9d46a6 extends Template
     </div>
     {% endif %}
 
-    <div class=\"row g-4\">
-        {% for artwork in artworks %}
-        <div class=\"col-md-6 col-lg-4\">
-            <div class=\"card h-100\">
-                {% if artwork.imageUrl %}
-                    <img src=\"{{ artwork.imageUrl }}\" alt=\"{{ artwork.title }}\" class=\"artwork-image\">
-                {% else %}
-                    <div class=\"artwork-image bg-secondary d-flex align-items-center justify-content-center text-white\">
-                        <i class=\"fas fa-image fa-3x\"></i>
-                    </div>
-                {% endif %}
+    <div class=\"row\">
+        <!-- Sidebar Filters -->
+        <div class=\"col-lg-3 mb-4\">
+            <div class=\"card shadow-sm border-0\">
+                <div class=\"card-header bg-white\">
+                    <h5 class=\"mb-0\"><i class=\"fas fa-filter me-2\"></i>Filtres</h5>
+                </div>
                 <div class=\"card-body\">
-                    <h5 class=\"card-title\">{{ artwork.title }}</h5>
-                    <p class=\"text-muted small mb-2\">
-                        {% if artwork.category %}
-                            <span class=\"badge bg-info\">{{ artwork.category.name }}</span>
-                        {% endif %}
-                        <span class=\"badge bg-{{ artwork.status == 'visible' ? 'success' : 'secondary' }}\">
-                            {{ artwork.status }}
-                        </span>
-                    </p>
-                    {% if artwork.description %}
-                        <p class=\"card-text\">{{ artwork.description|slice(0, 150) }}{% if artwork.description|length > 150 %}...{% endif %}</p>
-                    {% endif %}
-                    <div class=\"d-flex justify-content-between align-items-center mt-3\">
-                        {% if artwork.price %}
-                            <span class=\"text-primary fw-bold fs-5\">{{ artwork.price }} €</span>
-                        {% else %}
-                            <span class=\"text-muted\">Prix sur demande</span>
-                        {% endif %}
-                        <a href=\"{{ path('artwork_show', {id: artwork.id}) }}\" class=\"btn btn-sm btn-primary\">Voir détails</a>
-                    </div>
+                    <form action=\"{{ path('artworks') }}\" method=\"GET\">
+                        <div class=\"mb-3\">
+                            <label class=\"form-label fw-bold\">Catégorie</label>
+                            <select name=\"category\" class=\"form-select\">
+                                <option value=\"\">Toutes les catégories</option>
+                                {% for category in categories %}
+                                    <option value=\"{{ category.name }}\" {{ filters.category == category.name ? 'selected' : '' }}>
+                                        {{ category.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class=\"mb-3\">
+                            <label class=\"form-label fw-bold\">Prix (€)</label>
+                            <div class=\"d-flex gap-2\">
+                                <input type=\"number\" name=\"min_price\" class=\"form-control\" placeholder=\"Min\" value=\"{{ filters.min_price }}\">
+                                <input type=\"number\" name=\"max_price\" class=\"form-control\" placeholder=\"Max\" value=\"{{ filters.max_price }}\">
+                            </div>
+                        </div>
+
+                        <div class=\"mb-3\">
+                            <label class=\"form-label fw-bold\">Trier par</label>
+                            <select name=\"sort\" class=\"form-select mb-2\">
+                                <option value=\"newest\" {{ filters.sort == 'newest' ? 'selected' : '' }}>Plus récents</option>
+                                <option value=\"price\" {{ filters.sort == 'price' ? 'selected' : '' }}>Prix</option>
+                                <option value=\"likes\" {{ filters.sort == 'likes' ? 'selected' : '' }}>Popularité</option>
+                            </select>
+                            <select name=\"direction\" class=\"form-select\">
+                                <option value=\"DESC\" {{ filters.direction == 'DESC' ? 'selected' : '' }}>Décroissant</option>
+                                <option value=\"ASC\" {{ filters.direction == 'ASC' ? 'selected' : '' }}>Croissant</option>
+                            </select>
+                        </div>
+
+                        <div class=\"d-grid gap-2\">
+                            <button type=\"submit\" class=\"btn btn-primary\">Appliquer</button>
+                            <a href=\"{{ path('artworks') }}\" class=\"btn btn-outline-secondary\">Réinitialiser</a>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </div>
-        {% else %}
-        <div class=\"col-12\">
-            <div class=\"alert alert-info text-center\">
-                <i class=\"fas fa-info-circle me-2\"></i>Aucune œuvre disponible pour le moment.
-                <br>
-                <a href=\"{{ path('admin_dashboard') }}\" class=\"btn btn-primary mt-3\">Ajouter une œuvre (Admin)</a>
+            
+            <div class=\"d-grid mt-3\">
+                <a href=\"{{ path('harvard_collection') }}\" class=\"btn btn-danger text-white shadow-sm\">
+                    <i class=\"fas fa-university me-2\"></i>Collection Harvard
+                </a>
             </div>
         </div>
-        {% endfor %}
+
+        <!-- Artwork Grid -->
+        <div class=\"col-lg-9\">
+            <div class=\"row g-4\">
+                {% for artwork in artworks %}
+                <div class=\"col-md-6 col-lg-4\">
+                    <div class=\"card h-100 shadow-sm border-0 transition-hover\">
+                        <div class=\"position-relative\">
+                            {% if artwork.imageUrl %}
+                                <img src=\"{{ artwork.imageUrl }}\" alt=\"{{ artwork.title }}\" class=\"card-img-top artwork-image\" style=\"height: 250px; object-fit: cover;\">
+                            {% else %}
+                                <div class=\"card-img-top bg-light d-flex align-items-center justify-content-center\" style=\"height: 250px;\">
+                                    <i class=\"fas fa-image fa-3x text-muted\"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Like Button Overlay -->
+                            <button class=\"btn btn-light rounded-circle position-absolute top-0 end-0 m-2 shadow-sm like-btn\" 
+                                    data-artwork-id=\"{{ artwork.id }}\"
+                                    data-url=\"{{ path('api_artworks_like', {id: artwork.id}) }}\"
+                                    title=\"J'aime\">
+                                <i class=\"far fa-heart text-danger\"></i>
+                            </button>
+                        </div>
+                        
+                        <div class=\"card-body\">
+                            <div class=\"d-flex justify-content-between align-items-start mb-2\">
+                                <h5 class=\"card-title mb-0 text-truncate\">{{ artwork.title }}</h5>
+                                <span class=\"badge bg-light text-dark border\">
+                                    <i class=\"fas fa-heart text-danger me-1\"></i>
+                                    <span class=\"likes-count\">{{ artwork.likesCount }}</span>
+                                </span>
+                            </div>
+                            
+                            <p class=\"text-muted small mb-2\">
+                                {% if artwork.category %}
+                                    <span class=\"badge bg-info bg-opacity-10 text-info\">{{ artwork.category.name }}</span>
+                                {% endif %}
+                            </p>
+                            
+                            {% if artwork.description %}
+                                <p class=\"card-text small text-muted\">{{ artwork.description|slice(0, 100) }}...</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class=\"card-footer bg-white border-top-0 d-flex justify-content-between align-items-center pb-3\">
+                            <span class=\"fw-bold text-primary\">{{ artwork.price ? artwork.price ~ ' €' : 'Sur demande' }}</span>
+                            <a href=\"{{ path('artwork_show', {id: artwork.id}) }}\" class=\"btn btn-sm btn-outline-primary rounded-pill px-3\">Voir</a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class=\"col-12\">
+                    <div class=\"alert alert-info text-center py-5\">
+                        <i class=\"fas fa-search fa-3x mb-3 text-info\"></i>
+                        <h5>Aucune œuvre trouvée</h5>
+                        <p>Essayez de modifier vos filtres de recherche.</p>
+                        <a href=\"{{ path('artworks') }}\" class=\"btn btn-primary mt-2\">Voir tout</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
-
-
 ", "front/artworks.html.twig", "C:\\xampp\\htdocs\\MuseHub-my-work\\MuseHub-my-work\\templates\\front\\artworks.html.twig");
     }
 }

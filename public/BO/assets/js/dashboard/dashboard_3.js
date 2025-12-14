@@ -1,4 +1,4 @@
-//  ========  Morris chart  ========
+//  =  Morris chart  =
 $(document).ready(function () {
   var color_array = [
     AdmiroAdminConfig.primary,
@@ -26,7 +26,7 @@ $(document).ready(function () {
     $("#legend").append(legendItem);
   });
 });
-// =============groupBarChart===========================
+// ======groupBarChart======
 const groupChartOption = {
   series: [
     {

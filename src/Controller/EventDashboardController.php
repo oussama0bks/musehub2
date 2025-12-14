@@ -317,7 +317,7 @@ class EventDashboardController extends AbstractController
         }
 
         $newStatus = $request->request->get('status');
-        error_log("========= updateParticipantStatus CALLED =========");
+        error_log("== updateParticipantStatus CALLED ==");
         error_log("Event ID: $eventId, Participant ID: $participantId, New Status: $newStatus");
         
         if (!in_array($newStatus, ['confirmed', 'pending', 'rejected'])) {

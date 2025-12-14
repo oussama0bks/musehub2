@@ -1,6 +1,6 @@
-/**=====================
+/**
     Modal-animated Start
-==========================**/
+=====**/
 "use strict";
 function testAnim(x) {
   $(".modal .modal-dialog").attr("class", "modal-dialog  " + x + "  animated");
@@ -22,6 +22,6 @@ var modal_animate_custom = {
   modal_animate_custom.init();
 })(jQuery);
 
-/**=====================
+/**
   Modal-animated Ends
-==========================**/
+=====**/

@@ -15,18 +15,19 @@ return [
         '/_profiler/xdebug' => [[['_route' => '_profiler_xdebug', '_controller' => 'web_profiler.controller.profiler::xdebugAction'], null, null, null, false, false, null]],
         '/_profiler/open' => [[['_route' => '_profiler_open_file', '_controller' => 'web_profiler.controller.profiler::openAction'], null, null, null, false, false, null]],
         '/admin/dashboard' => [[['_route' => 'app_admin_dashboard', '_controller' => 'App\\Controller\\AdminController::dashboard'], null, null, null, false, false, null]],
+        '/admin/stats' => [[['_route' => 'admin_stats', '_controller' => 'App\\Controller\\AdminController::stats'], null, null, null, false, false, null]],
         '/admin/artworks' => [
             [['_route' => 'admin_artwork_index', '_controller' => 'App\\Controller\\ArtworkAdminController::index'], null, ['GET' => 0], null, false, false, null],
             [['_route' => 'admin_artworks_list', '_controller' => 'App\\Controller\\ArtworkDashboardController::list'], null, ['GET' => 0], null, false, false, null],
         ],
-        '/admin/artworks/new' => [[['_route' => 'admin_artwork_new', '_controller' => 'App\\Controller\\ArtworkAdminController::new'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        '/admin/artworks/categories' => [[['_route' => 'admin_category_index', '_controller' => 'App\\Controller\\ArtworkAdminController::categories'], null, ['GET' => 0], null, false, false, null]],
-        '/admin/artworks/categories/new' => [[['_route' => 'admin_category_new', '_controller' => 'App\\Controller\\ArtworkAdminController::categoryNew'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
         '/api/artworks' => [
             [['_route' => 'api_artworks_list', '_controller' => 'App\\Controller\\ArtworkApiController::list'], null, ['GET' => 0], null, false, false, null],
             [['_route' => 'api_artworks_create', '_controller' => 'App\\Controller\\ArtworkApiController::create'], null, ['POST' => 0], null, false, false, null],
         ],
         '/admin/artworks/statistics' => [[['_route' => 'admin_artworks_stats', '_controller' => 'App\\Controller\\ArtworkDashboardController::statistics'], null, ['GET' => 0], null, false, false, null]],
+        '/admin/artworks/new' => [[['_route' => 'admin_artwork_new', '_controller' => 'App\\Controller\\ArtworkDashboardController::new'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        '/admin/artworks/categories' => [[['_route' => 'admin_category_index', '_controller' => 'App\\Controller\\ArtworkDashboardController::categories'], null, ['GET' => 0], null, false, false, null]],
+        '/admin/artworks/categories/new' => [[['_route' => 'admin_category_new', '_controller' => 'App\\Controller\\ArtworkDashboardController::categoryNew'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
         '/api/auth/register' => [
             [['_route' => 'api_auth_register', '_controller' => 'App\\Controller\\AuthApiController::register'], null, ['POST' => 0], null, false, false, null],
             [['_route' => 'api_auth_register_form', '_controller' => 'App\\Controller\\RegistrationController::apiRegisterRedirect'], null, ['GET' => 0], null, false, false, null],
@@ -59,16 +60,19 @@ return [
         '/artists' => [[['_route' => 'artists', '_controller' => 'App\\Controller\\FrontOfficeController::artists'], null, null, null, false, false, null]],
         '/events' => [[['_route' => 'events', '_controller' => 'App\\Controller\\FrontOfficeController::events'], null, null, null, false, false, null]],
         '/marketplace' => [[['_route' => 'marketplace', '_controller' => 'App\\Controller\\FrontOfficeController::marketplace'], null, null, null, false, false, null]],
-        '/marketplace/test' => [[['_route' => 'marketplace_test', '_controller' => 'App\\Controller\\FrontOfficeController::marketplaceTest'], null, null, null, false, false, null]],
         '/community' => [[['_route' => 'community', '_controller' => 'App\\Controller\\FrontOfficeController::community'], null, null, null, false, false, null]],
+        '/harvard-collection' => [[['_route' => 'harvard_collection', '_controller' => 'App\\Controller\\HarvardArtController::index'], null, null, null, false, false, null]],
         '/api/auth/login' => [[['_route' => 'api_auth_login', '_controller' => 'App\\Controller\\JWTAuthenticationController::login'], null, ['POST' => 0], null, false, false, null]],
         '/api/marketplace' => [[['_route' => 'api_marketplace_list', '_controller' => 'App\\Controller\\MarketplaceApiController::list'], null, ['GET' => 0], null, false, false, null]],
         '/api/marketplace/listing' => [[['_route' => 'api_marketplace_create_listing', '_controller' => 'App\\Controller\\MarketplaceApiController::createListing'], null, ['POST' => 0], null, false, false, null]],
         '/admin/marketplace' => [[['_route' => 'admin_marketplace_list', '_controller' => 'App\\Controller\\MarketplaceDashboardController::list'], null, ['GET' => 0], null, false, false, null]],
         '/admin/marketplace/listings/new' => [[['_route' => 'admin_marketplace_listing_new', '_controller' => 'App\\Controller\\MarketplaceDashboardController::newListing'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        '/messages' => [[['_route' => 'app_messages', '_controller' => 'App\\Controller\\MessageController::index'], null, null, null, false, false, null]],
+        '/messages/send/admin' => [[['_route' => 'app_message_send_admin', '_controller' => 'App\\Controller\\MessageController::sendToAdmin'], null, ['POST' => 0], null, false, false, null]],
         '/api/notifications' => [[['_route' => 'api_notifications_list', '_controller' => 'App\\Controller\\NotificationController::list'], null, ['GET' => 0], null, false, false, null]],
         '/api/notifications/unread-count' => [[['_route' => 'api_notifications_unread_count', '_controller' => 'App\\Controller\\NotificationController::unreadCount'], null, ['GET' => 0], null, false, false, null]],
         '/api/notifications/mark-all-read' => [[['_route' => 'api_notifications_mark_all_read', '_controller' => 'App\\Controller\\NotificationController::markAllAsRead'], null, ['POST' => 0], null, false, false, null]],
+        '/offre/api/create' => [[['_route' => 'offre_api_create', '_controller' => 'App\\Controller\\OffreController::apiCreate'], null, ['POST' => 0], null, false, false, null]],
         '/offre' => [[['_route' => 'offre_index', '_controller' => 'App\\Controller\\OffreController::index'], null, ['GET' => 0], null, false, false, null]],
         '/offre/new' => [[['_route' => 'offre_new', '_controller' => 'App\\Controller\\OffreController::new'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
         '/admin/marketplace/offres' => [[['_route' => 'admin_offre_list', '_controller' => 'App\\Controller\\OffreDashboardController::list'], null, ['GET' => 0], null, false, false, null]],
@@ -78,7 +82,6 @@ return [
         '/forgot-password' => [[['_route' => 'password_forgot', '_controller' => 'App\\Controller\\PasswordResetWebController::forgotPassword'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
         '/admin/posts' => [[['_route' => 'admin_post_index', '_controller' => 'App\\Controller\\PostAdminController::index'], null, ['GET' => 0], null, false, false, null]],
         '/profile' => [[['_route' => 'user_profile', '_controller' => 'App\\Controller\\ProfileController::profile'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        '/profile/api/avatar' => [[['_route' => 'api_upload_avatar', '_controller' => 'App\\Controller\\ProfileController::uploadAvatar'], null, ['POST' => 0], null, false, false, null]],
         '/register' => [[['_route' => 'register', '_controller' => 'App\\Controller\\RegistrationController::register'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
         '/login' => [[['_route' => 'login', '_controller' => 'App\\Controller\\SecurityController::login'], null, null, null, false, false, null]],
         '/logout' => [[['_route' => 'logout', '_controller' => 'App\\Controller\\SecurityController::logout'], null, null, null, false, false, null]],
@@ -88,8 +91,8 @@ return [
         '/web/artworks/create' => [[['_route' => 'web_artworks_create', '_controller' => 'App\\Controller\\WebFormController::createArtwork'], null, ['POST' => 0], null, false, false, null]],
         '/web/marketplace/listing/create' => [[['_route' => 'web_marketplace_listing_create', '_controller' => 'App\\Controller\\WebFormController::createListing'], null, ['POST' => 0], null, false, false, null]],
         '/web/posts/create' => [[['_route' => 'web_posts_create', '_controller' => 'App\\Controller\\WebFormController::createPost'], null, ['POST' => 0], null, false, false, null]],
-        '/web/marketplace/offre/create' => [[['_route' => 'web_marketplace_offre_create', '_controller' => 'App\\Controller\\WebFormController::createOffre'], null, ['POST' => 0], null, false, false, null]],
         '/posts' => [[['_route' => 'post_index', '_controller' => 'App\\Controller\\WebPostController::index'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        '/api/webhooks/stripe' => [[['_route' => 'stripe_webhook', '_controller' => 'App\\Controller\\WebhookController::handleStripeWebhook'], null, ['POST' => 0], null, false, false, null]],
     ],
     [ // $regexpList
         0 => '{^(?'
@@ -112,153 +115,162 @@ return [
                     .')'
                 .')'
                 .'|/a(?'
-                    .'|dmin/(?'
-                        .'|artworks/(?'
-                            .'|([^/]++)/(?'
-                                .'|edit(*:243)'
-                                .'|delete(*:257)'
-                            .')'
-                            .'|categories/([^/]++)/(?'
-                                .'|edit(*:293)'
-                                .'|delete(*:307)'
-                            .')'
-                        .')'
-                        .'|community/posts/([^/]++)/(?'
-                            .'|edit(*:349)'
-                            .'|delete(*:363)'
-                        .')'
-                        .'|event(?'
-                            .'|s/([^/]++)/(?'
-                                .'|edit(*:398)'
-                                .'|delete(*:412)'
-                                .'|participants(?'
-                                    .'|(*:435)'
-                                    .'|/([^/]++)/status(*:459)'
-                                .')'
-                            .')'
-                            .'|\\-types/([^/]++)/(?'
-                                .'|edit(*:493)'
-                                .'|delete(*:507)'
-                                .'|toggle(*:521)'
-                            .')'
-                        .')'
-                        .'|marketplace/(?'
-                            .'|listings/([^/]++)/(?'
-                                .'|edit(*:571)'
-                                .'|delete(*:585)'
-                            .')'
-                            .'|offres/([^/]++)/(?'
-                                .'|edit(*:617)'
-                                .'|delete(*:631)'
-                                .'|accept(*:645)'
-                                .'|refuse(*:659)'
-                            .')'
-                        .')'
-                        .'|transactions/invoice/([^/]++)(*:698)'
-                        .'|users/([^/]++)/(?'
-                            .'|edit(*:728)'
-                            .'|toggle(*:742)'
-                            .'|delete(*:756)'
-                        .')'
-                    .')'
                     .'|pi/(?'
                         .'|artworks/([^/]++)(?'
-                            .'|(*:792)'
+                            .'|/like(*:238)'
+                            .'|(*:246)'
                         .')'
                         .'|posts/(?'
                             .'|([^/]++)(?'
                                 .'|/(?'
                                     .'|comments(?'
-                                        .'|(*:836)'
+                                        .'|(*:290)'
                                         .'|/([^/]++)(?'
-                                            .'|(*:856)'
-                                            .'|/replies(*:872)'
-                                            .'|(*:880)'
+                                            .'|(*:310)'
+                                            .'|/replies(*:326)'
+                                            .'|(*:334)'
                                         .')'
-                                        .'|(*:889)'
+                                        .'|(*:343)'
                                     .')'
-                                    .'|like(*:902)'
-                                    .'|dislike(*:917)'
-                                    .'|reaction(*:933)'
+                                    .'|like(*:356)'
+                                    .'|dislike(*:371)'
+                                    .'|reaction(*:387)'
                                 .')'
-                                .'|(*:942)'
+                                .'|(*:396)'
                             .')'
-                            .'|search(*:957)'
-                            .'|([^/]++)/upload\\-image(*:987)'
+                            .'|search(*:411)'
+                            .'|([^/]++)/upload\\-image(*:441)'
                         .')'
                         .'|event(?'
                             .'|s/([^/]++)(?'
                                 .'|/(?'
-                                    .'|map(*:1024)'
-                                    .'|join(*:1037)'
-                                    .'|leave(*:1051)'
-                                    .'|ics(*:1063)'
+                                    .'|map(*:478)'
+                                    .'|join(*:490)'
+                                    .'|leave(*:503)'
+                                    .'|ics(*:514)'
                                 .')'
-                                .'|(*:1073)'
+                                .'|(*:523)'
                             .')'
                             .'|\\-types/([^/]++)(?'
-                                .'|(*:1102)'
+                                .'|(*:551)'
                             .')'
                         .')'
                         .'|marketplace/(?'
-                            .'|buy/([^/]++)(*:1140)'
+                            .'|buy/([^/]++)(*:588)'
                             .'|listing/([^/]++)(?'
-                                .'|(*:1168)'
+                                .'|(*:615)'
                             .')'
-                            .'|invoice/([^/]++)(*:1194)'
+                            .'|invoice/([^/]++)(*:640)'
                         .')'
-                        .'|notifications/([^/]++)/read(*:1231)'
+                        .'|notifications/([^/]++)/read(*:676)'
                     .')'
-                    .'|rtworks/(\\d+)(*:1254)'
+                    .'|dmin/(?'
+                        .'|artworks/(?'
+                            .'|([^/]++)/(?'
+                                .'|edit(*:721)'
+                                .'|delete(*:735)'
+                            .')'
+                            .'|categories/([^/]++)/(?'
+                                .'|edit(*:771)'
+                                .'|delete(*:785)'
+                            .')'
+                            .'|([^/]++)/check\\-stolen(*:816)'
+                        .')'
+                        .'|community/posts/([^/]++)/(?'
+                            .'|edit(*:857)'
+                            .'|delete(*:871)'
+                        .')'
+                        .'|event(?'
+                            .'|s/([^/]++)/(?'
+                                .'|edit(*:906)'
+                                .'|delete(*:920)'
+                                .'|participants(?'
+                                    .'|(*:943)'
+                                    .'|/([^/]++)/status(*:967)'
+                                .')'
+                            .')'
+                            .'|\\-types/([^/]++)/(?'
+                                .'|edit(*:1001)'
+                                .'|delete(*:1016)'
+                                .'|toggle(*:1031)'
+                            .')'
+                        .')'
+                        .'|marketplace/(?'
+                            .'|listings/([^/]++)/(?'
+                                .'|show(*:1082)'
+                                .'|edit(*:1095)'
+                                .'|delete(*:1110)'
+                            .')'
+                            .'|offres/([^/]++)/(?'
+                                .'|edit(*:1143)'
+                                .'|delete(*:1158)'
+                                .'|accept(*:1173)'
+                                .'|refuse(*:1188)'
+                            .')'
+                        .')'
+                        .'|transactions/invoice/([^/]++)(*:1228)'
+                        .'|users/([^/]++)/(?'
+                            .'|edit(*:1259)'
+                            .'|toggle(*:1274)'
+                            .'|delete(*:1289)'
+                        .')'
+                    .')'
+                    .'|rtworks/(\\d+)(*:1313)'
                 .')'
                 .'|/community/(?'
                     .'|([^/]++)(?'
-                        .'|(*:1289)'
+                        .'|(*:1348)'
                         .'|/(?'
-                            .'|edit(*:1306)'
-                            .'|delete(*:1321)'
+                            .'|edit(*:1365)'
+                            .'|delete(*:1380)'
                         .')'
                     .')'
-                    .'|admin(*:1337)'
+                    .'|admin(*:1396)'
                     .'|posts(?'
-                        .'|(*:1354)'
-                        .'|/([^/]++)(*:1372)'
+                        .'|(*:1413)'
+                        .'|/([^/]++)(*:1431)'
                     .')'
                 .')'
-                .'|/marketplace/offers/(\\d+)(*:1408)'
+                .'|/m(?'
+                    .'|arketplace/offers/(\\d+)(*:1470)'
+                    .'|essages/(?'
+                        .'|conversation/([^/]++)(*:1511)'
+                        .'|send/(\\d+)(*:1530)'
+                    .')'
+                .')'
                 .'|/offre/(?'
-                    .'|listing/([^/]++)(*:1443)'
+                    .'|listing/([^/]++)(*:1567)'
                     .'|([^/]++)(?'
-                        .'|(*:1463)'
+                        .'|(*:1587)'
                         .'|/(?'
-                            .'|edit(*:1480)'
-                            .'|accept(*:1495)'
-                            .'|refuse(*:1510)'
-                            .'|delete(*:1525)'
+                            .'|edit(*:1604)'
+                            .'|accept(*:1619)'
+                            .'|refuse(*:1634)'
+                            .'|delete(*:1649)'
                         .')'
                     .')'
-                    .'|my\\-offres(*:1546)'
-                    .'|by\\-status/([^/]++)(*:1574)'
+                    .'|my\\-offres(*:1670)'
+                    .'|by\\-status/([^/]++)(*:1698)'
                 .')'
-                .'|/reset\\-password/([^/]++)(*:1609)'
+                .'|/reset\\-password/([^/]++)(*:1733)'
                 .'|/web/(?'
                     .'|events/([^/]++)/(?'
-                        .'|subscribe(*:1654)'
-                        .'|unsubscribe(*:1674)'
+                        .'|subscribe(*:1778)'
+                        .'|unsubscribe(*:1798)'
                     .')'
                     .'|posts/([^/]++)/(?'
-                        .'|update(*:1708)'
-                        .'|delete(*:1723)'
+                        .'|update(*:1832)'
+                        .'|delete(*:1847)'
                         .'|comment(?'
-                            .'|(*:1742)'
+                            .'|(*:1866)'
                             .'|s/([^/]++)/(?'
-                                .'|update(*:1771)'
-                                .'|delete(*:1786)'
+                                .'|update(*:1895)'
+                                .'|delete(*:1910)'
                             .')'
                         .')'
                     .')'
                 .')'
-                .'|/posts/([^/]++)(*:1814)'
+                .'|/posts/([^/]++)(*:1938)'
             .')/?$}sDu',
     ],
     [ // $dynamicRoutes
@@ -270,96 +282,101 @@ return [
         168 => [[['_route' => '_profiler_exception', '_controller' => 'web_profiler.controller.exception_panel::body'], ['token'], null, null, false, false, null]],
         181 => [[['_route' => '_profiler_exception_css', '_controller' => 'web_profiler.controller.exception_panel::stylesheet'], ['token'], null, null, false, false, null]],
         191 => [[['_route' => '_profiler', '_controller' => 'web_profiler.controller.profiler::panelAction'], ['token'], null, null, false, true, null]],
-        243 => [[['_route' => 'admin_artwork_edit', '_controller' => 'App\\Controller\\ArtworkAdminController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        257 => [[['_route' => 'admin_artwork_delete', '_controller' => 'App\\Controller\\ArtworkAdminController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
-        293 => [[['_route' => 'admin_category_edit', '_controller' => 'App\\Controller\\ArtworkAdminController::categoryEdit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        307 => [[['_route' => 'admin_category_delete', '_controller' => 'App\\Controller\\ArtworkAdminController::categoryDelete'], ['id'], ['POST' => 0], null, false, false, null]],
-        349 => [[['_route' => 'admin_community_post_edit', '_controller' => 'App\\Controller\\CommunityDashboardController::editPost'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        363 => [[['_route' => 'admin_community_post_delete', '_controller' => 'App\\Controller\\CommunityDashboardController::deletePost'], ['id'], ['POST' => 0], null, false, false, null]],
-        398 => [[['_route' => 'admin_events_edit', '_controller' => 'App\\Controller\\EventDashboardController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        412 => [[['_route' => 'admin_events_delete', '_controller' => 'App\\Controller\\EventDashboardController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
-        435 => [[['_route' => 'admin_events_participants', '_controller' => 'App\\Controller\\EventDashboardController::participants'], ['id'], ['GET' => 0], null, false, false, null]],
-        459 => [[['_route' => 'admin_events_participant_status', '_controller' => 'App\\Controller\\EventDashboardController::updateParticipantStatus'], ['eventId', 'participantId'], ['POST' => 0], null, false, false, null]],
-        493 => [[['_route' => 'admin_event_types_edit', '_controller' => 'App\\Controller\\EventTypeDashboardController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        507 => [[['_route' => 'admin_event_types_delete', '_controller' => 'App\\Controller\\EventTypeDashboardController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
-        521 => [[['_route' => 'admin_event_types_toggle', '_controller' => 'App\\Controller\\EventTypeDashboardController::toggle'], ['id'], ['POST' => 0], null, false, false, null]],
-        571 => [[['_route' => 'admin_marketplace_listing_edit', '_controller' => 'App\\Controller\\MarketplaceDashboardController::editListing'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        585 => [[['_route' => 'admin_marketplace_listing_delete', '_controller' => 'App\\Controller\\MarketplaceDashboardController::deleteListing'], ['id'], ['POST' => 0], null, false, false, null]],
-        617 => [[['_route' => 'admin_offre_edit', '_controller' => 'App\\Controller\\OffreDashboardController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        631 => [[['_route' => 'admin_offre_delete', '_controller' => 'App\\Controller\\OffreDashboardController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
-        645 => [[['_route' => 'admin_offre_accept', '_controller' => 'App\\Controller\\OffreDashboardController::accept'], ['id'], ['POST' => 0], null, false, false, null]],
-        659 => [[['_route' => 'admin_offre_refuse', '_controller' => 'App\\Controller\\OffreDashboardController::refuse'], ['id'], ['POST' => 0], null, false, false, null]],
-        698 => [[['_route' => 'admin_transactions_invoice', '_controller' => 'App\\Controller\\TransactionAdminController::invoice'], ['uuid'], ['GET' => 0], null, false, true, null]],
-        728 => [[['_route' => 'admin_users_edit', '_controller' => 'App\\Controller\\UserDashboardController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        742 => [[['_route' => 'admin_users_toggle', '_controller' => 'App\\Controller\\UserDashboardController::toggle'], ['id'], ['POST' => 0], null, false, false, null]],
-        756 => [[['_route' => 'admin_users_delete', '_controller' => 'App\\Controller\\UserDashboardController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
-        792 => [
+        238 => [[['_route' => 'api_artworks_like', '_controller' => 'App\\Controller\\ArtworkApiController::like'], ['id'], ['POST' => 0], null, false, false, null]],
+        246 => [
             [['_route' => 'api_artworks_update', '_controller' => 'App\\Controller\\ArtworkApiController::update'], ['id'], ['PUT' => 0], null, false, true, null],
             [['_route' => 'api_artworks_delete', '_controller' => 'App\\Controller\\ArtworkApiController::delete'], ['id'], ['DELETE' => 0], null, false, true, null],
         ],
-        836 => [[['_route' => 'create_comment', '_controller' => 'App\\Controller\\CommentController::create'], ['postId'], ['POST' => 0], null, false, false, null]],
-        856 => [[['_route' => 'update_comment', '_controller' => 'App\\Controller\\CommentController::update'], ['postId', 'id'], ['PUT' => 0], null, false, true, null]],
-        872 => [[['_route' => 'api_posts_comments_reply', '_controller' => 'App\\Controller\\CommentController::createReply'], ['postId', 'id'], ['POST' => 0], null, false, false, null]],
-        880 => [[['_route' => 'delete_comment', '_controller' => 'App\\Controller\\CommentController::delete'], ['postId', 'id'], ['DELETE' => 0], null, false, true, null]],
-        889 => [
+        290 => [[['_route' => 'create_comment', '_controller' => 'App\\Controller\\CommentController::create'], ['postId'], ['POST' => 0], null, false, false, null]],
+        310 => [[['_route' => 'update_comment', '_controller' => 'App\\Controller\\CommentController::update'], ['postId', 'id'], ['PUT' => 0], null, false, true, null]],
+        326 => [[['_route' => 'api_posts_comments_reply', '_controller' => 'App\\Controller\\CommentController::createReply'], ['postId', 'id'], ['POST' => 0], null, false, false, null]],
+        334 => [[['_route' => 'delete_comment', '_controller' => 'App\\Controller\\CommentController::delete'], ['postId', 'id'], ['DELETE' => 0], null, false, true, null]],
+        343 => [
             [['_route' => 'api_posts_comments', '_controller' => 'App\\Controller\\CommunityApiController::getComments'], ['id'], ['GET' => 0], null, false, false, null],
             [['_route' => 'api_posts_comment', '_controller' => 'App\\Controller\\CommunityApiController::comment'], ['id'], ['POST' => 0], null, false, false, null],
             [['_route' => 'app_post_comment', '_controller' => 'App\\Controller\\PostController::comment'], ['id'], ['POST' => 0], null, false, false, null],
         ],
-        902 => [[['_route' => 'api_posts_like', '_controller' => 'App\\Controller\\CommunityApiController::like'], ['id'], ['POST' => 0], null, false, false, null]],
-        917 => [[['_route' => 'api_posts_dislike', '_controller' => 'App\\Controller\\CommunityApiController::dislike'], ['id'], ['POST' => 0], null, false, false, null]],
-        933 => [[['_route' => 'api_posts_reaction', '_controller' => 'App\\Controller\\CommunityApiController::react'], ['id'], ['POST' => 0], null, false, false, null]],
-        942 => [
+        356 => [[['_route' => 'api_posts_like', '_controller' => 'App\\Controller\\CommunityApiController::like'], ['id'], ['POST' => 0], null, false, false, null]],
+        371 => [[['_route' => 'api_posts_dislike', '_controller' => 'App\\Controller\\CommunityApiController::dislike'], ['id'], ['POST' => 0], null, false, false, null]],
+        387 => [[['_route' => 'api_posts_reaction', '_controller' => 'App\\Controller\\CommunityApiController::react'], ['id'], ['POST' => 0], null, false, false, null]],
+        396 => [
             [['_route' => 'api_posts_update', '_controller' => 'App\\Controller\\PostController::update'], ['id'], ['PUT' => 0], null, false, true, null],
             [['_route' => 'api_posts_delete', '_controller' => 'App\\Controller\\PostController::delete'], ['id'], ['DELETE' => 0], null, false, true, null],
         ],
-        957 => [[['_route' => 'app_post_search', '_controller' => 'App\\Controller\\PostController::search'], [], ['GET' => 0], null, false, false, null]],
-        987 => [[['_route' => 'app_post_uploadimage', '_controller' => 'App\\Controller\\PostController::uploadImage'], ['id'], ['POST' => 0], null, false, false, null]],
-        1024 => [[['_route' => 'api_events_map_detail', '_controller' => 'App\\Controller\\EventApiController::mapDetail'], ['id'], ['GET' => 0], null, false, false, null]],
-        1037 => [[['_route' => 'api_events_join', '_controller' => 'App\\Controller\\EventApiController::join'], ['id'], ['POST' => 0], null, false, false, null]],
-        1051 => [[['_route' => 'api_events_leave', '_controller' => 'App\\Controller\\EventApiController::leave'], ['id'], ['DELETE' => 0], null, false, false, null]],
-        1063 => [[['_route' => 'api_events_ics', '_controller' => 'App\\Controller\\EventApiController::exportIcs'], ['id'], ['GET' => 0], null, false, false, null]],
-        1073 => [
+        411 => [[['_route' => 'app_post_search', '_controller' => 'App\\Controller\\PostController::search'], [], ['GET' => 0], null, false, false, null]],
+        441 => [[['_route' => 'app_post_uploadimage', '_controller' => 'App\\Controller\\PostController::uploadImage'], ['id'], ['POST' => 0], null, false, false, null]],
+        478 => [[['_route' => 'api_events_map_detail', '_controller' => 'App\\Controller\\EventApiController::mapDetail'], ['id'], ['GET' => 0], null, false, false, null]],
+        490 => [[['_route' => 'api_events_join', '_controller' => 'App\\Controller\\EventApiController::join'], ['id'], ['POST' => 0], null, false, false, null]],
+        503 => [[['_route' => 'api_events_leave', '_controller' => 'App\\Controller\\EventApiController::leave'], ['id'], ['DELETE' => 0], null, false, false, null]],
+        514 => [[['_route' => 'api_events_ics', '_controller' => 'App\\Controller\\EventApiController::exportIcs'], ['id'], ['GET' => 0], null, false, false, null]],
+        523 => [
             [['_route' => 'api_events_update', '_controller' => 'App\\Controller\\EventApiController::update'], ['id'], ['PUT' => 0], null, false, true, null],
             [['_route' => 'api_events_delete', '_controller' => 'App\\Controller\\EventApiController::delete'], ['id'], ['DELETE' => 0], null, false, true, null],
         ],
-        1102 => [
+        551 => [
             [['_route' => 'api_event_types_show', '_controller' => 'App\\Controller\\EventTypeApiController::show'], ['id'], ['GET' => 0], null, false, true, null],
             [['_route' => 'api_event_types_update', '_controller' => 'App\\Controller\\EventTypeApiController::update'], ['id'], ['PUT' => 0, 'PATCH' => 1], null, false, true, null],
             [['_route' => 'api_event_types_delete', '_controller' => 'App\\Controller\\EventTypeApiController::delete'], ['id'], ['DELETE' => 0], null, false, true, null],
         ],
-        1140 => [[['_route' => 'api_marketplace_buy', '_controller' => 'App\\Controller\\MarketplaceApiController::buy'], ['id'], ['POST' => 0], null, false, true, null]],
-        1168 => [
+        588 => [[['_route' => 'api_marketplace_buy', '_controller' => 'App\\Controller\\MarketplaceApiController::buy'], ['id'], ['POST' => 0], null, false, true, null]],
+        615 => [
             [['_route' => 'api_marketplace_update_listing', '_controller' => 'App\\Controller\\MarketplaceApiController::updateListing'], ['id'], ['PUT' => 0], null, false, true, null],
             [['_route' => 'api_marketplace_delete_listing', '_controller' => 'App\\Controller\\MarketplaceApiController::deleteListing'], ['id'], ['DELETE' => 0], null, false, true, null],
         ],
-        1194 => [[['_route' => 'api_marketplace_invoice', '_controller' => 'App\\Controller\\MarketplaceApiController::getInvoice'], ['uuid'], ['GET' => 0], null, false, true, null]],
-        1231 => [[['_route' => 'api_notifications_mark_read', '_controller' => 'App\\Controller\\NotificationController::markAsRead'], ['id'], ['POST' => 0], null, false, false, null]],
-        1254 => [[['_route' => 'artwork_show', '_controller' => 'App\\Controller\\FrontOfficeController::artworkShow'], ['id'], null, null, false, true, null]],
-        1289 => [[['_route' => 'app_community_show', '_controller' => 'App\\Controller\\CommunityController::show'], ['id'], ['GET' => 0], null, false, true, null]],
-        1306 => [[['_route' => 'app_community_edit', '_controller' => 'App\\Controller\\CommunityController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        1321 => [[['_route' => 'app_community_delete', '_controller' => 'App\\Controller\\CommunityController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
-        1337 => [[['_route' => 'app_community_admin', '_controller' => 'App\\Controller\\CommunityController::admin'], [], ['GET' => 0], null, false, false, null]],
-        1354 => [[['_route' => 'community_posts', '_controller' => 'App\\Controller\\WebPostController::index'], [], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        1372 => [[['_route' => 'community_post_show', '_controller' => 'App\\Controller\\WebPostController::show'], ['id'], ['GET' => 0, 'POST' => 1], null, false, true, null]],
-        1408 => [[['_route' => 'marketplace_offer_show', '_controller' => 'App\\Controller\\FrontOfficeController::marketplaceOffer'], ['id'], null, null, false, true, null]],
-        1443 => [[['_route' => 'offre_by_listing', '_controller' => 'App\\Controller\\OffreController::byListing'], ['id'], ['GET' => 0], null, false, true, null]],
-        1463 => [[['_route' => 'offre_show', '_controller' => 'App\\Controller\\OffreController::show'], ['id'], ['GET' => 0], null, false, true, null]],
-        1480 => [[['_route' => 'offre_edit', '_controller' => 'App\\Controller\\OffreController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        1495 => [[['_route' => 'offre_accept', '_controller' => 'App\\Controller\\OffreController::accept'], ['id'], ['POST' => 0], null, false, false, null]],
-        1510 => [[['_route' => 'offre_refuse', '_controller' => 'App\\Controller\\OffreController::refuse'], ['id'], ['POST' => 0], null, false, false, null]],
-        1525 => [[['_route' => 'offre_delete', '_controller' => 'App\\Controller\\OffreController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
-        1546 => [[['_route' => 'offre_my_offres', '_controller' => 'App\\Controller\\OffreController::myOffres'], [], ['GET' => 0], null, false, false, null]],
-        1574 => [[['_route' => 'offre_by_status', '_controller' => 'App\\Controller\\OffreController::byStatus'], ['statut'], ['GET' => 0], null, false, true, null]],
-        1609 => [[['_route' => 'password_reset_form', '_controller' => 'App\\Controller\\PasswordResetWebController::resetPassword'], ['token'], ['GET' => 0, 'POST' => 1], null, false, true, null]],
-        1654 => [[['_route' => 'web_events_subscribe', '_controller' => 'App\\Controller\\WebFormController::subscribeToEvent'], ['id'], ['POST' => 0], null, false, false, null]],
-        1674 => [[['_route' => 'web_events_unsubscribe', '_controller' => 'App\\Controller\\WebFormController::unsubscribeFromEvent'], ['id'], ['POST' => 0], null, false, false, null]],
-        1708 => [[['_route' => 'web_posts_update', '_controller' => 'App\\Controller\\WebFormController::updatePost'], ['id'], ['POST' => 0], null, false, false, null]],
-        1723 => [[['_route' => 'web_posts_delete', '_controller' => 'App\\Controller\\WebFormController::deletePost'], ['id'], ['POST' => 0], null, false, false, null]],
-        1742 => [[['_route' => 'web_posts_comment', '_controller' => 'App\\Controller\\WebFormController::commentPost'], ['id'], ['POST' => 0], null, false, false, null]],
-        1771 => [[['_route' => 'web_comments_update', '_controller' => 'App\\Controller\\WebFormController::updateComment'], ['postId', 'commentId'], ['POST' => 0], null, false, false, null]],
-        1786 => [[['_route' => 'web_comments_delete', '_controller' => 'App\\Controller\\WebFormController::deleteComment'], ['postId', 'commentId'], ['POST' => 0], null, false, false, null]],
-        1814 => [
+        640 => [[['_route' => 'api_marketplace_invoice', '_controller' => 'App\\Controller\\MarketplaceApiController::getInvoice'], ['uuid'], ['GET' => 0], null, false, true, null]],
+        676 => [[['_route' => 'api_notifications_mark_read', '_controller' => 'App\\Controller\\NotificationController::markAsRead'], ['id'], ['POST' => 0], null, false, false, null]],
+        721 => [[['_route' => 'admin_artwork_edit', '_controller' => 'App\\Controller\\ArtworkDashboardController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        735 => [[['_route' => 'admin_artwork_delete', '_controller' => 'App\\Controller\\ArtworkDashboardController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
+        771 => [[['_route' => 'admin_category_edit', '_controller' => 'App\\Controller\\ArtworkDashboardController::categoryEdit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        785 => [[['_route' => 'admin_category_delete', '_controller' => 'App\\Controller\\ArtworkDashboardController::categoryDelete'], ['id'], ['POST' => 0], null, false, false, null]],
+        816 => [[['_route' => 'admin_artwork_check_stolen', '_controller' => 'App\\Controller\\ArtworkDashboardController::checkStolen'], ['id'], ['GET' => 0], null, false, false, null]],
+        857 => [[['_route' => 'admin_community_post_edit', '_controller' => 'App\\Controller\\CommunityDashboardController::editPost'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        871 => [[['_route' => 'admin_community_post_delete', '_controller' => 'App\\Controller\\CommunityDashboardController::deletePost'], ['id'], ['POST' => 0], null, false, false, null]],
+        906 => [[['_route' => 'admin_events_edit', '_controller' => 'App\\Controller\\EventDashboardController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        920 => [[['_route' => 'admin_events_delete', '_controller' => 'App\\Controller\\EventDashboardController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
+        943 => [[['_route' => 'admin_events_participants', '_controller' => 'App\\Controller\\EventDashboardController::participants'], ['id'], ['GET' => 0], null, false, false, null]],
+        967 => [[['_route' => 'admin_events_participant_status', '_controller' => 'App\\Controller\\EventDashboardController::updateParticipantStatus'], ['eventId', 'participantId'], ['POST' => 0], null, false, false, null]],
+        1001 => [[['_route' => 'admin_event_types_edit', '_controller' => 'App\\Controller\\EventTypeDashboardController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1016 => [[['_route' => 'admin_event_types_delete', '_controller' => 'App\\Controller\\EventTypeDashboardController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
+        1031 => [[['_route' => 'admin_event_types_toggle', '_controller' => 'App\\Controller\\EventTypeDashboardController::toggle'], ['id'], ['POST' => 0], null, false, false, null]],
+        1082 => [[['_route' => 'admin_marketplace_listing_show', '_controller' => 'App\\Controller\\MarketplaceDashboardController::showListing'], ['id'], ['GET' => 0], null, false, false, null]],
+        1095 => [[['_route' => 'admin_marketplace_listing_edit', '_controller' => 'App\\Controller\\MarketplaceDashboardController::editListing'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1110 => [[['_route' => 'admin_marketplace_listing_delete', '_controller' => 'App\\Controller\\MarketplaceDashboardController::deleteListing'], ['id'], ['POST' => 0], null, false, false, null]],
+        1143 => [[['_route' => 'admin_offre_edit', '_controller' => 'App\\Controller\\OffreDashboardController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1158 => [[['_route' => 'admin_offre_delete', '_controller' => 'App\\Controller\\OffreDashboardController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
+        1173 => [[['_route' => 'admin_offre_accept', '_controller' => 'App\\Controller\\OffreDashboardController::accept'], ['id'], ['POST' => 0], null, false, false, null]],
+        1188 => [[['_route' => 'admin_offre_refuse', '_controller' => 'App\\Controller\\OffreDashboardController::refuse'], ['id'], ['POST' => 0], null, false, false, null]],
+        1228 => [[['_route' => 'admin_transactions_invoice', '_controller' => 'App\\Controller\\TransactionAdminController::invoice'], ['uuid'], ['GET' => 0], null, false, true, null]],
+        1259 => [[['_route' => 'admin_users_edit', '_controller' => 'App\\Controller\\UserDashboardController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1274 => [[['_route' => 'admin_users_toggle', '_controller' => 'App\\Controller\\UserDashboardController::toggle'], ['id'], ['POST' => 0], null, false, false, null]],
+        1289 => [[['_route' => 'admin_users_delete', '_controller' => 'App\\Controller\\UserDashboardController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
+        1313 => [[['_route' => 'artwork_show', '_controller' => 'App\\Controller\\FrontOfficeController::artworkShow'], ['id'], null, null, false, true, null]],
+        1348 => [[['_route' => 'app_community_show', '_controller' => 'App\\Controller\\CommunityController::show'], ['id'], ['GET' => 0], null, false, true, null]],
+        1365 => [[['_route' => 'app_community_edit', '_controller' => 'App\\Controller\\CommunityController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1380 => [[['_route' => 'app_community_delete', '_controller' => 'App\\Controller\\CommunityController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
+        1396 => [[['_route' => 'app_community_admin', '_controller' => 'App\\Controller\\CommunityController::admin'], [], ['GET' => 0], null, false, false, null]],
+        1413 => [[['_route' => 'community_posts', '_controller' => 'App\\Controller\\WebPostController::index'], [], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1431 => [[['_route' => 'community_post_show', '_controller' => 'App\\Controller\\WebPostController::show'], ['id'], ['GET' => 0, 'POST' => 1], null, false, true, null]],
+        1470 => [[['_route' => 'marketplace_offer_show', '_controller' => 'App\\Controller\\FrontOfficeController::marketplaceOffer'], ['id'], null, null, false, true, null]],
+        1511 => [[['_route' => 'app_message_show', '_controller' => 'App\\Controller\\MessageController::show'], ['id'], null, null, false, true, null]],
+        1530 => [[['_route' => 'app_message_send', '_controller' => 'App\\Controller\\MessageController::send'], ['id'], ['POST' => 0], null, false, true, null]],
+        1567 => [[['_route' => 'offre_by_listing', '_controller' => 'App\\Controller\\OffreController::byListing'], ['id'], ['GET' => 0], null, false, true, null]],
+        1587 => [[['_route' => 'offre_show', '_controller' => 'App\\Controller\\OffreController::show'], ['id'], ['GET' => 0], null, false, true, null]],
+        1604 => [[['_route' => 'offre_edit', '_controller' => 'App\\Controller\\OffreController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1619 => [[['_route' => 'offre_accept', '_controller' => 'App\\Controller\\OffreController::accept'], ['id'], ['POST' => 0], null, false, false, null]],
+        1634 => [[['_route' => 'offre_refuse', '_controller' => 'App\\Controller\\OffreController::refuse'], ['id'], ['POST' => 0], null, false, false, null]],
+        1649 => [[['_route' => 'offre_delete', '_controller' => 'App\\Controller\\OffreController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
+        1670 => [[['_route' => 'offre_my_offres', '_controller' => 'App\\Controller\\OffreController::myOffres'], [], ['GET' => 0], null, false, false, null]],
+        1698 => [[['_route' => 'offre_by_status', '_controller' => 'App\\Controller\\OffreController::byStatus'], ['statut'], ['GET' => 0], null, false, true, null]],
+        1733 => [[['_route' => 'password_reset_form', '_controller' => 'App\\Controller\\PasswordResetWebController::resetPassword'], ['token'], ['GET' => 0, 'POST' => 1], null, false, true, null]],
+        1778 => [[['_route' => 'web_events_subscribe', '_controller' => 'App\\Controller\\WebFormController::subscribeToEvent'], ['id'], ['POST' => 0], null, false, false, null]],
+        1798 => [[['_route' => 'web_events_unsubscribe', '_controller' => 'App\\Controller\\WebFormController::unsubscribeFromEvent'], ['id'], ['POST' => 0], null, false, false, null]],
+        1832 => [[['_route' => 'web_posts_update', '_controller' => 'App\\Controller\\WebFormController::updatePost'], ['id'], ['POST' => 0], null, false, false, null]],
+        1847 => [[['_route' => 'web_posts_delete', '_controller' => 'App\\Controller\\WebFormController::deletePost'], ['id'], ['POST' => 0], null, false, false, null]],
+        1866 => [[['_route' => 'web_posts_comment', '_controller' => 'App\\Controller\\WebFormController::commentPost'], ['id'], ['POST' => 0], null, false, false, null]],
+        1895 => [[['_route' => 'web_comments_update', '_controller' => 'App\\Controller\\WebFormController::updateComment'], ['postId', 'commentId'], ['POST' => 0], null, false, false, null]],
+        1910 => [[['_route' => 'web_comments_delete', '_controller' => 'App\\Controller\\WebFormController::deleteComment'], ['postId', 'commentId'], ['POST' => 0], null, false, false, null]],
+        1938 => [
             [['_route' => 'post_show', '_controller' => 'App\\Controller\\WebPostController::show'], ['id'], ['GET' => 0, 'POST' => 1], null, false, true, null],
             [null, null, null, null, false, false, 0],
         ],

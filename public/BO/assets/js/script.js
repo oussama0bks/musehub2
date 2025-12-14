@@ -13,15 +13,15 @@
 document.addEventListener("DOMContentLoaded", function () {
   const body = document.querySelector("body");
   const html = document.querySelector("html");
-    /*=====================
+    /*
         01 Loader Js
-    ==========================*/
+    =====*/
     $(".loader-wrapper").fadeOut("slow", function () {
       $(this).remove();
     });
-  /*=====================
+  /*
         02 Tap to top js
-    ==========================*/
+    =====*/
   const button = document.querySelector(".tap-top");
   const displayButton = () => {
     window.addEventListener("scroll", () => {
@@ -44,9 +44,9 @@ document.addEventListener("DOMContentLoaded", function () {
   };
   displayButton();
   scrollToTop();
-  /*=====================
+  /*
       03 Header DropDown Toggle
-  ==========================*/
+  =====*/
   body.addEventListener("click", function (event) {
     const headerDropdownMenu = document.querySelectorAll(".custom-menu");
     const dropdownEl = event.target.closest(".custom-dropdown");
@@ -63,9 +63,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const dropdownMenu = dropdownEl.querySelector(".custom-menu");
     if (!visible) dropdownMenu.classList.add("show");
   });
-  /*=====================
+  /*
       04 Full screen js
-  ==========================*/
+  =====*/
   $(document).ready(function () {
     $(".full-screen").click(function (event) {
       var elem = document.documentElement;
@@ -93,9 +93,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
   
-  /*=====================
+  /*
        05. Header search js
-     ==========================*/
+     =====*/
   const filterSidebarToggle = document.querySelector(".md-sidebar-toggle");
   const filterSidebarAside = document.querySelector(".md-sidebar-aside");
   filterSidebarToggle?.addEventListener("click", function () {
@@ -108,9 +108,9 @@ document.addEventListener("DOMContentLoaded", function () {
     $(".search-full").removeClass("open");
     $("body").removeClass("offcanvas");
   });
-  /*=====================
+  /*
        05. Dark Mode js
-    ==========================*/
+    =====*/
     if(window.location.pathname.includes("layout-dark.html")){
       $("body").removeClass("light");
       $("body").addClass("dark-only");
@@ -156,9 +156,9 @@ document.addEventListener("DOMContentLoaded", function () {
     var tets = $(this).parent().parent().parent().parent().addClass("d-none");
     console.log(tets);
   });
-  /*=====================
+  /*
     00. Background Image js
-    ==========================*/
+    =====*/
   $(".bg-center").parent().addClass("b-center");
   $(".bg-img-cover").parent().addClass("bg-size");
   $(".bg-img-cover").each(function () {
@@ -173,9 +173,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     el.hide();
   });
-  /*=====================
+  /*
     00. Language js
-    ==========================*/
+    =====*/
   var tnum = "en";
 
   $(document).ready(function () {

@@ -66,7 +66,7 @@
     });
   };
   window.onload = init;
-  // ============================================================
+  // ====
   const slider_input = document.getElementById('slider_input');
   if (slider_input !== null) {
     // Access the 'value' property only if `slider_input` is not null
@@ -85,5 +85,5 @@
     slider_input.addEventListener('input', showSliderValue, false);
     console.log(slider_input.value);
   }
-  // ====================================================================
+  // =====
 })();

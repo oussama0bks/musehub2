@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const offerForm = document.getElementById('offerForm');
     const submitOfferBtn = document.getElementById('submitOfferBtn');
 
-    // ========== ACHAT IMMÉDIAT ==========
+    // === ACHAT IMMÉDIAT ===
     if (btnBuyNow) {
         btnBuyNow.addEventListener('click', function(e) {
             e.preventDefault();
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ========== FAIRE UNE OFFRE ==========
+    // === FAIRE UNE OFFRE ===
     if (offerForm) {
         offerForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ========== FONCTIONS UTILITAIRES ==========
+    // === FONCTIONS UTILITAIRES ===
     function showSuccessAlert(title, message) {
         const alertHtml = `
             <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">

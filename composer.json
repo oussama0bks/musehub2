@@ -13,6 +13,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.5",
         "http-interop/http-factory-guzzle": "*",
+        "kigkonsult/icalcreator": "^2.41",
         "lexik/jwt-authentication-bundle": "^2.18",
         "meilisearch/meilisearch-php": "^1.16",
         "phpdocumentor/reflection-docblock": "^5.6",

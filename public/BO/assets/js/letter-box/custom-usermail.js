@@ -1,6 +1,6 @@
-/*=====================
+/*
   Email hide/show js
-==========================*/
+=====*/
 
 (function () {
   const emailList = document.querySelector(".email-list");
@@ -20,7 +20,7 @@
     emailList.classList.remove("hide");
   });
 
-  // =======================================================
+  // ======
 
   // Active to icon color changes
 

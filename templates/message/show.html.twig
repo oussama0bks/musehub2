@@ -1,0 +1,65 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Discussion avec {{ otherUser.firstname ?? otherUser.email }} - MuseHub{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="mb-3">
+                <a href="{{ path('app_messages') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+
+            <div class="card shadow-sm border-0" style="height: 70vh;">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            {{ otherUser.email|first|upper }}
+                        </div>
+                        <h5 class="mb-0">{{ otherUser.firstname ? otherUser.firstname ~ ' ' ~ otherUser.lastname : otherUser.email }}</h5>
+                    </div>
+                </div>
+                
+                <div class="card-body overflow-auto p-4" id="chat-messages" style="background-color: #f8f9fa;">
+                    {% for message in messages %}
+                        <div class="d-flex mb-3 {{ message.sender == app.user ? 'justify-content-end' : 'justify-content-start' }}">
+                            <div class="card border-0 shadow-sm" style="max-width: 75%; {{ message.sender == app.user ? 'background-color: #0d6efd; color: white; border-radius: 15px 15px 0 15px;' : 'background-color: white; border-radius: 15px 15px 15px 0;' }}">
+                                <div class="card-body p-3">
+                                    <p class="mb-1">{{ message.content|nl2br }}</p>
+                                    <small class="{{ message.sender == app.user ? 'text-white-50' : 'text-muted' }}" style="font-size: 0.75rem;">
+                                        {{ message.createdAt|date('H:i') }}
+                                        {% if message.sender == app.user and message.isRead %}
+                                            <i class="fas fa-check-double ms-1"></i>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="card-footer bg-white p-3">
+                    <form action="{{ path('app_message_send', {id: otherUser.id}) }}" method="POST">
+                        <div class="input-group">
+                            <input type="text" name="content" class="form-control" placeholder="Écrivez votre message..." required autocomplete="off">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Scroll to bottom of chat
+    window.onload = function() {
+        var chatDiv = document.getElementById("chat-messages");
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+</script>
+{% endblock %}

@@ -304,18 +304,21 @@ class __TwigTemplate_c0c84acdcb1b797ec7a2be87760cbea0 extends Template
     </div>
 
     <!-- Module Statistiques -->
-    <div class=\"col-md-6 col-lg-4\">
-        <div class=\"module-card\" style=\"background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);\">
+  <div class=\"col-md-6 col-lg-4\">
+       <a href=\"";
+        // line 166
+        yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("admin_stats");
+        yield "\" class=\"module-card\" style=\"text-decoration: none; display: block; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);\">
             <div class=\"d-flex align-items-center\">
                 <div class=\"icon-wrapper\">
                     <i class=\"fas fa-chart-line\"></i>
                 </div>
                 <div class=\"ms-3\">
-                    <h5 class=\"mb-1\">Statistiques</h5>
+                    <h5 class=\"mb-1 text-dark\">Statistiques</h5>
                     <p class=\"text-muted small mb-0\">Vue d'ensemble</p>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
@@ -394,7 +397,7 @@ class __TwigTemplate_c0c84acdcb1b797ec7a2be87760cbea0 extends Template
      */
     public function getDebugInfo(): array
     {
-        return array (  356 => 203,  348 => 198,  340 => 193,  332 => 188,  299 => 158,  289 => 151,  271 => 136,  260 => 128,  250 => 121,  232 => 106,  221 => 98,  211 => 91,  200 => 83,  190 => 76,  179 => 68,  169 => 61,  150 => 45,  138 => 36,  126 => 27,  114 => 18,  100 => 6,  87 => 5,  64 => 3,  41 => 1,);
+        return array (  359 => 203,  351 => 198,  343 => 193,  335 => 188,  310 => 166,  299 => 158,  289 => 151,  271 => 136,  260 => 128,  250 => 121,  232 => 106,  221 => 98,  211 => 91,  200 => 83,  190 => 76,  179 => 68,  169 => 61,  150 => 45,  138 => 36,  126 => 27,  114 => 18,  100 => 6,  87 => 5,  64 => 3,  41 => 1,);
     }
 
     public function getSourceContext(): Source
@@ -563,18 +566,18 @@ class __TwigTemplate_c0c84acdcb1b797ec7a2be87760cbea0 extends Template
     </div>
 
     <!-- Module Statistiques -->
-    <div class=\"col-md-6 col-lg-4\">
-        <div class=\"module-card\" style=\"background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);\">
+  <div class=\"col-md-6 col-lg-4\">
+       <a href=\"{{ path('admin_stats') }}\" class=\"module-card\" style=\"text-decoration: none; display: block; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);\">
             <div class=\"d-flex align-items-center\">
                 <div class=\"icon-wrapper\">
                     <i class=\"fas fa-chart-line\"></i>
                 </div>
                 <div class=\"ms-3\">
-                    <h5 class=\"mb-1\">Statistiques</h5>
+                    <h5 class=\"mb-1 text-dark\">Statistiques</h5>
                     <p class=\"text-muted small mb-0\">Vue d'ensemble</p>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 

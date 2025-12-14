@@ -6,12 +6,12 @@ use App\Repository\ArtworkRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
 use App\Repository\ListingRepository;
-use App\Repository\OffreRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\PostReactionRepository;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -22,7 +22,6 @@ class FrontOfficeController extends AbstractController
         private CategoryRepository $categoryRepository,
         private EventRepository $eventRepository,
         private ListingRepository $listingRepository,
-        private OffreRepository $offreRepository,
         private PostRepository $postRepository,
         private PostReactionRepository $postReactionRepository,
         private ParticipantRepository $participantRepository,
@@ -46,7 +45,7 @@ class FrontOfficeController extends AbstractController
             : $visibleArtworks;
 
         $artistNames = $this->buildArtistNamesMap($visibleArtworks);
-
+        
         $upcomingEvents = $this->eventRepository->findUpcoming();
         $latestPosts = $this->postRepository->findBy([], ['createdAt' => 'DESC'], 3);
 
@@ -91,17 +90,23 @@ class FrontOfficeController extends AbstractController
     }
 
     #[Route('/artworks', name: 'artworks')]
-    public function artworks(): Response
+    public function artworks(Request $request): Response
     {
-        $artworks = $this->artworkRepository->findBy(
-            ['status' => 'visible'],
-            ['id' => 'DESC']
-        );
+        $filters = [
+            'category' => $request->query->get('category'),
+            'min_price' => $request->query->get('min_price'),
+            'max_price' => $request->query->get('max_price'),
+            'sort' => $request->query->get('sort'),
+            'direction' => $request->query->get('direction'),
+        ];
+
+        $artworks = $this->artworkRepository->findAllWithFilters($filters);
         $categories = $this->categoryRepository->findAll();
 
         return $this->render('front/artworks.html.twig', [
             'artworks' => $artworks,
             'categories' => $categories,
+            'filters' => $filters,
         ]);
     }
 
@@ -113,8 +118,14 @@ class FrontOfficeController extends AbstractController
             throw $this->createNotFoundException('Œuvre introuvable');
         }
 
+        $artist = null;
+        if ($artwork->getArtistUuid()) {
+            $artist = $this->userRepository->findOneBy(['uuid' => $artwork->getArtistUuid()]);
+        }
+
         return $this->render('front/artwork_show.html.twig', [
             'artwork' => $artwork,
+            'artist' => $artist,
         ]);
     }
 
@@ -158,32 +169,9 @@ class FrontOfficeController extends AbstractController
             );
         }
 
-        // Récupérer les offres pour chaque listing
-        $offresParListing = [];
-        foreach ($listings as $listing) {
-            $offresParListing[$listing->getId()] = $this->offreRepository->findByListing($listing->getId());
-        }
-
         return $this->render('front/marketplace.html.twig', [
             'listings' => $listings,
             'userArtworks' => $userArtworks,
-            'offresParListing' => $offresParListing,
-        ]);
-    }
-
-    #[Route('/marketplace/test', name: 'marketplace_test')]
-    public function marketplaceTest(): Response
-    {
-        $listings = $this->listingRepository->findAvailable();
-
-        $offresParListing = [];
-        foreach ($listings as $listing) {
-            $offresParListing[$listing->getId()] = $this->offreRepository->findByListing($listing->getId());
-        }
-
-        return $this->render('front/marketplace_test.html.twig', [
-            'listings' => $listings,
-            'offresParListing' => $offresParListing,
         ]);
     }
 
@@ -201,7 +189,7 @@ class FrontOfficeController extends AbstractController
     }
 
     #[Route('/community', name: 'community')]
-    public function community(\Symfony\Component\HttpFoundation\Request $request): Response
+    public function community(): Response
     {
         $posts = $this->postRepository->findBy([], ['createdAt' => 'DESC'], 20);
         $authorNames = $this->buildAuthorNamesMap($posts);
@@ -213,8 +201,6 @@ class FrontOfficeController extends AbstractController
             'authorNames' => $authorNames,
             'commentAuthorNames' => $commentAuthorNames,
             'userReactions' => $userReactions,
-            'currentCategory' => $request->query->get('category', ''),
-            'currentSort' => $request->query->get('sort', 'recent'),
         ]);
     }
 
@@ -299,23 +285,5 @@ class FrontOfficeController extends AbstractController
         }
 
         return $map;
-    }
-
-    /**
-     * Page de succès après paiement Stripe
-     */
-    #[Route('/marketplace/success', name: 'marketplace_payment_success')]
-    public function paymentSuccess(): Response
-    {
-        return $this->render('front/payment_success.html.twig');
-    }
-
-    /**
-     * Page d'annulation après paiement Stripe
-     */
-    #[Route('/marketplace/cancel', name: 'marketplace_payment_cancel')]
-    public function paymentCancel(): Response
-    {
-        return $this->render('front/payment_cancel.html.twig');
     }
 }

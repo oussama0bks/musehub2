@@ -5443,7 +5443,7 @@ const MultiMatchSet = new Set([FuzzyMatch.type, IncludeMatch.type]);
 
 /**
  * Command-like searching
- * ======================
+ * =
  *
  * Given multiple search terms delimited by spaces.e.g. `^jscript .python$ ruby !java`,
  * search in a given text.

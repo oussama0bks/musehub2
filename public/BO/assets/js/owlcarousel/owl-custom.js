@@ -1,6 +1,6 @@
-/**=====================
+/**
     Owl-carousel js Start
-==========================**/
+=====**/
 var owl_carousel_custom = {
   init: function () {
     var owl = $("#owl-carousel-13");
@@ -75,6 +75,6 @@ var owl_carousel_custom = {
   owl_carousel_custom.init();
 })(jQuery);
 
-/**=====================
+/**
   Owl-carousel Ends
-==========================**/
+=====**/

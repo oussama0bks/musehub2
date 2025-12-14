@@ -28,6 +28,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $username = null;
 
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $firstName = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $lastName = null;
+
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
@@ -49,8 +55,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $passwordResetRequestedAt = null;
 
-    #[ORM\Column(type: 'integer')]
-    private int $reputation = 0;
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
 
     public function __construct()
     {
@@ -58,6 +64,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->uuid = $this->generateUuid();
         $this->roles = ['ROLE_USER'];
         $this->isActive = true;
+        $this->artworkLikes = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->catalogues = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function getId(): ?int
@@ -122,6 +130,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(?string $username): self
     {
         $this->username = $username;
+        return $this;
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(?string $firstName): self
+    {
+        $this->firstName = $firstName;
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(?string $lastName): self
+    {
+        $this->lastName = $lastName;
         return $this;
     }
 
@@ -201,23 +231,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // No temporary sensitive data stored on the user.
     }
 
-    public function getReputation(): int
-    {
-        return $this->reputation;
-    }
-
-    public function setReputation(int $reputation): self
-    {
-        $this->reputation = max(0, $reputation);
-        return $this;
-    }
-
-    public function addReputation(int $points): self
-    {
-        $this->reputation += $points;
-        return $this;
-    }
-
     private function generateUuid(): string
     {
         $data = random_bytes(16);
@@ -225,5 +238,100 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $data[8] = chr((ord($data[8]) & 0x3f) | 0x80);
 
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
+
+    // Soft Delete Methods
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): self
+    {
+        $this->deletedAt = $deletedAt;
+        return $this;
+    }
+
+    public function softDelete(): self
+    {
+        $this->deletedAt = new \DateTime();
+        return $this;
+    }
+
+    public function restore(): self
+    {
+        $this->deletedAt = null;
+        return $this;
+    }
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Catalogue::class, orphanRemoval: true)]
+    private \Doctrine\Common\Collections\Collection $catalogues;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ArtworkLike::class, orphanRemoval: true)]
+    private $artworkLikes;
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, ArtworkLike>
+     */
+    public function getArtworkLikes(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->artworkLikes;
+    }
+
+    public function addArtworkLike(ArtworkLike $artworkLike): self
+    {
+        if (!$this->artworkLikes->contains($artworkLike)) {
+            $this->artworkLikes->add($artworkLike);
+            $artworkLike->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeArtworkLike(ArtworkLike $artworkLike): self
+    {
+        if ($this->artworkLikes->removeElement($artworkLike)) {
+            // set the owning side to null (unless already changed)
+            if ($artworkLike->getUser() === $this) {
+                $artworkLike->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, Catalogue>
+     */
+    public function getCatalogues(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->catalogues;
+    }
+
+    public function addCatalogue(Catalogue $catalogue): self
+    {
+        if (!$this->catalogues->contains($catalogue)) {
+            $this->catalogues->add($catalogue);
+            $catalogue->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCatalogue(Catalogue $catalogue): self
+    {
+        if ($this->catalogues->removeElement($catalogue)) {
+            // set the owning side to null (unless already changed)
+            if ($catalogue->getUser() === $this) {
+                $catalogue->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function isDeleted(): bool
+    {
+        return $this->deletedAt !== null;
     }
 }

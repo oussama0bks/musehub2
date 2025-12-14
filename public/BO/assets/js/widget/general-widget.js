@@ -389,7 +389,7 @@
       prevEl: ".swiper-button-prev",
     },
   });
-  /*=======/Sales Stats Radial Chart/=======*/
+  /*/Sales Stats Radial Chart/*/
   const salesStatsOption = {
     series: [70],
     chart: {

@@ -1,7 +1,7 @@
 (function () {
-/*=====================
+/*
         01 Tap to top js
-    ==========================*/
+    =====*/
 const button = document.querySelector(".tap-top");
 const displayButton = () => {
   window.addEventListener("scroll", () => {
@@ -24,9 +24,9 @@ const scrollToTop = () => {
 };
 displayButton();
 scrollToTop();
-/*=====================
+/*
         01 sticky js
-    ==========================*/
+    =====*/
 
 $(window).scroll(function () {
   if ($(this).scrollTop() > 0) {
@@ -36,9 +36,9 @@ $(window).scroll(function () {
   }
 });
 
-/*=====================
+/*
         landing header
-    ==========================*/
+    =====*/
 $(".toggle-menu").on("click", function () {
   $(".landing-menu").toggleClass("open");
 });

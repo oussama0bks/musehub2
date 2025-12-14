@@ -17,8 +17,7 @@ class RegistrationController extends AbstractController
     public function register(
         Request $request,
         UserRepository $userRepository,
-        UserPasswordHasherInterface $passwordHasher,
-        EntityManagerInterface $em
+        \App\Service\UserService $userService
     ): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute('home');
@@ -69,13 +68,10 @@ class RegistrationController extends AbstractController
                 $user->setEmail($email);
                 $user->setUsername($username ?: null);
                 $user->setRoles([$accountType]);
-                $hashedPassword = $passwordHasher->hashPassword($user, $password);
-                $user->setPassword($hashedPassword);
+                
+                $userService->registerUser($user, $password);
 
-                $em->persist($user);
-                $em->flush();
-
-                $this->addFlash('success', 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
+                $this->addFlash('success', 'Compte créé avec succès ! Bienvenue.');
 
                 return $this->redirectToRoute('login');
             }
@@ -92,5 +88,3 @@ class RegistrationController extends AbstractController
         return $this->redirectToRoute('register');
     }
 }
-
-

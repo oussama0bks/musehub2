@@ -45,4 +45,66 @@ class ArtworkRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function findAllWithFilters(array $filters, bool $isAdmin = false)
+    {
+        $qb = $this->createQueryBuilder('a');
+
+        if (!$isAdmin) {
+            $qb->where('a.status = :status')
+               ->setParameter('status', 'visible');
+        } elseif (!empty($filters['status'])) {
+            $qb->andWhere('a.status = :status')
+               ->setParameter('status', $filters['status']);
+        }
+
+        if (!empty($filters['category'])) {
+            // Check if filtered by ID (for admin) or Name (for front)
+            if (is_numeric($filters['category'])) {
+                 $qb->andWhere('a.category = :category')
+                    ->setParameter('category', $filters['category']);
+            } else {
+                $qb->join('a.category', 'c')
+                   ->andWhere('c.name = :category')
+                   ->setParameter('category', $filters['category']);
+            }
+        }
+
+        if (!empty($filters['min_price'])) {
+            $qb->andWhere('a.price >= :minPrice')
+               ->setParameter('minPrice', $filters['min_price']);
+        }
+
+        if (!empty($filters['max_price'])) {
+            $qb->andWhere('a.price <= :maxPrice')
+               ->setParameter('maxPrice', $filters['max_price']);
+        }
+
+        $sort = $filters['sort'] ?? 'newest';
+        $direction = strtoupper($filters['direction'] ?? 'DESC');
+        if (!in_array($direction, ['ASC', 'DESC'])) {
+            $direction = 'DESC';
+        }
+
+        switch ($sort) {
+            case 'price':
+                $qb->orderBy('a.price', $direction);
+                break;
+            case 'likes':
+                $qb->orderBy('a.likesCount', $direction);
+                break;
+            case 'category':
+                $qb->leftJoin('a.category', 'cat')
+                   ->orderBy('cat.name', $direction);
+                break;
+            case 'title':
+                $qb->orderBy('a.title', $direction);
+                break;
+            case 'newest':
+            default:
+                $qb->orderBy('a.id', $direction);
+                break;
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

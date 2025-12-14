@@ -605,7 +605,7 @@ var options = {
 };
 var chart = new ApexCharts(document.querySelector("#visitor-chart"), options);
 chart.render();
-/*=======/Sales Stats Radial Chart/=======*/
+/*/Sales Stats Radial Chart/*/
 const salesStatsOption = {
   series: [70],
   chart: {
