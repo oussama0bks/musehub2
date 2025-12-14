@@ -6,7 +6,6 @@ use App\Entity\Post;
 use App\Repository\PostRepository;
 use App\Repository\CommentRepository;
 use App\Service\ContentFilter;
-use App\Service\SearchService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,8 +21,7 @@ class CommunityDashboardController extends AbstractController
         private PostRepository $postRepository,
         private CommentRepository $commentRepository,
         private EntityManagerInterface $em,
-        private ContentFilter $contentFilter,
-        private SearchService $searchService
+        private ContentFilter $contentFilter
     ) {
     }
 
@@ -95,41 +93,20 @@ class CommunityDashboardController extends AbstractController
     }
 
     /**
-     * Handle search using MeiliSearch and render admin view
+     * Handle search using database LIKE query and render admin view
      * Only called when search is used alone (no category or sort filters)
      */
     private function searchAndRender(string $search, Request $request): Response
     {
-        // Perform search using MeiliSearch (no filters since we only use search alone)
-        $searchResults = $this->searchService->searchPosts($search, 100, []);
+        // Perform search using database LIKE query
+        $qb = $this->postRepository->createQueryBuilder('p')
+            ->leftJoin('p.category', 'c')
+            ->addSelect('c')
+            ->where('p.content LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->orderBy('p.createdAt', 'DESC');
 
-        if (isset($searchResults['error'])) {
-            // Fallback to SQL LIKE if MeiliSearch fails
-            $qb = $this->postRepository->createQueryBuilder('p')
-                ->leftJoin('p.category', 'c')
-                ->addSelect('c')
-                ->where('p.content LIKE :search')
-                ->setParameter('search', '%' . $search . '%')
-                ->orderBy('p.createdAt', 'DESC');
-
-            $posts = $qb->setMaxResults(100)->getQuery()->getResult();
-        } else {
-            // Get posts from MeiliSearch results
-            $postIds = array_column($searchResults['hits'], 'id');
-            if (empty($postIds)) {
-                $posts = [];
-            } else {
-                // Fetch posts with category joins for proper display
-                $posts = $this->postRepository->createQueryBuilder('p')
-                    ->leftJoin('p.category', 'c')
-                    ->addSelect('c')
-                    ->where('p.id IN (:ids)')
-                    ->setParameter('ids', $postIds)
-                    ->orderBy('p.createdAt', 'DESC') // Order by creation date as fallback
-                    ->getQuery()
-                    ->getResult();
-            }
-        }
+        $posts = $qb->setMaxResults(100)->getQuery()->getResult();
 
         // Calculate daily posts
         $dailyPosts = [];

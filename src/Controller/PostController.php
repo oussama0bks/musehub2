@@ -3,7 +3,7 @@ namespace App\Controller;
 
 use App\Entity\Post;
 use App\Repository\PostRepository;
-use App\Service\SearchService;
+
 use App\Service\ImageUploadService;
 use App\Service\ReputationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,7 +19,6 @@ class PostController extends AbstractController
     public function __construct(
         private EntityManagerInterface $em,
         private PostRepository $postRepository,
-        private SearchService $searchService,
         private ImageUploadService $imageUploadService,
         private ReputationService $reputationService
     ) {
@@ -65,8 +64,8 @@ class PostController extends AbstractController
         // Award reputation for creating post
         $this->reputationService->awardPostCreation($user->getUuid());
 
-        // Index post in Meilisearch
-        $this->searchService->indexPost($post);
+        // Index post in Meilisearch - REMOVED
+        // $this->searchService->indexPost($post);
 
         return $this->json(['id' => $post->getId()], 201);
     }
@@ -97,8 +96,8 @@ class PostController extends AbstractController
 
         $this->em->flush();
 
-        // Update post in Meilisearch index
-        $this->searchService->updatePostIndex($post);
+        // Update post in Meilisearch index - REMOVED
+        // $this->searchService->updatePostIndex($post);
 
         return $this->json(['id' => $post->getId(), 'message' => 'Post updated successfully']);
     }
@@ -118,8 +117,8 @@ class PostController extends AbstractController
             return $this->json(['error' => 'Not authorized to delete this post'], 403);
         }
 
-        // Delete from Meilisearch index
-        $this->searchService->deletePostIndex($id);
+        // Delete from Meilisearch index - REMOVED
+        // $this->searchService->deletePostIndex($id);
 
         $this->em->remove($post);
         $this->em->flush();
@@ -162,22 +161,11 @@ class PostController extends AbstractController
         return $this->json(['id' => $comment->getId()], 201);
     }
 
-    #[Route('/search', methods: ['GET'])]
-    public function search(Request $request): JsonResponse
-    {
-        $query = $request->query->get('query', '');
-
-        if (empty($query)) {
-            return $this->json(['error' => 'query parameter is required'], 400);
-        }
-
-        $limit = (int) $request->query->get('limit', 20);
-        $limit = min(max($limit, 1), 100); // Between 1 and 100
-
-        $results = $this->searchService->searchPosts($query, $limit);
-
-        return $this->json($results);
-    }
+    // #[Route('/search', methods: ['GET'])]
+    // public function search(Request $request): JsonResponse
+    // {
+    //     return $this->json(['error' => 'Search temporarily disabled'], 503);
+    // }
 
     #[Route('/{id}/upload-image', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
@@ -204,8 +192,8 @@ class PostController extends AbstractController
             $post->setImageUrl($imageUrl);
             $this->em->flush();
 
-            // Update search index with new image
-            $this->searchService->updatePostIndex($post);
+            // Update search index with new image - REMOVED
+            // $this->searchService->updatePostIndex($post);
 
             return $this->json([
                 'message' => 'Image uploaded successfully',

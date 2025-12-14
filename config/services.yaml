@@ -17,13 +17,15 @@ services:
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         bind:
             # API Service Parameters
-            $meilisearchUrl: '%env(MEILISEARCH_URL)%'
-            $meilisearchApiKey: '%env(MEILISEARCH_API_KEY)%'
             $openaiApiKey: '%env(OPENAI_API_KEY)%'
             $openaiApiUrl: '%env(OPENAI_API_URL)%'
             $cloudinaryCloudName: '%env(CLOUDINARY_CLOUD_NAME)%'
             $cloudinaryApiKey: '%env(CLOUDINARY_API_KEY)%'
             $cloudinaryApiSecret: '%env(CLOUDINARY_API_SECRET)%'
+            # Rate Limiter Services
+            $createPostLimiter: '@limiter.create_post_limiter'
+            $createCommentLimiter: '@limiter.create_comment_limiter'
+            $postReactionLimiter: '@limiter.post_reaction_limiter'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

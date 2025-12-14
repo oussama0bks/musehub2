@@ -15,7 +15,7 @@ use App\Repository\UserRepository;
 use App\Service\ContentFilter;
 use App\Service\CommentModerationService;
 use App\Service\NotificationService;
-use App\Service\SearchService;
+
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,7 +34,7 @@ class FrontOfficeController extends AbstractController
         private PostReactionRepository $postReactionRepository,
         private ParticipantRepository $participantRepository,
         private UserRepository $userRepository,
-        private SearchService $searchService,
+
         private ContentFilter $contentFilter,
         private CommentModerationService $moderationService,
         private NotificationService $notificationService,
@@ -294,41 +294,20 @@ class FrontOfficeController extends AbstractController
     }
 
     /**
-     * Handle search using MeiliSearch and render community view
+     * Handle search using database LIKE query and render community view
      * Only called when search is used alone (no category or sort filters)
      */
     private function searchAndRender(string $search, \Symfony\Component\HttpFoundation\Request $request): Response
     {
-        // Perform search using MeiliSearch (no filters since we only use search alone)
-        $searchResults = $this->searchService->searchPosts($search, 50, []);
+        // Perform search using database LIKE query
+        $qb = $this->postRepository->createQueryBuilder('p')
+            ->leftJoin('p.category', 'c')
+            ->addSelect('c')
+            ->where('p.content LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->orderBy('p.createdAt', 'DESC');
 
-        if (isset($searchResults['error'])) {
-            // Fallback to SQL LIKE if MeiliSearch fails
-            $qb = $this->postRepository->createQueryBuilder('p')
-                ->leftJoin('p.category', 'c')
-                ->addSelect('c')
-                ->where('p.content LIKE :search')
-                ->setParameter('search', '%' . $search . '%')
-                ->orderBy('p.createdAt', 'DESC');
-
-            $posts = $qb->setMaxResults(50)->getQuery()->getResult();
-        } else {
-            // Get posts from MeiliSearch results
-            $postIds = array_column($searchResults['hits'], 'id');
-            if (empty($postIds)) {
-                $posts = [];
-            } else {
-                // Fetch posts with category joins for proper display
-                $posts = $this->postRepository->createQueryBuilder('p')
-                    ->leftJoin('p.category', 'c')
-                    ->addSelect('c')
-                    ->where('p.id IN (:ids)')
-                    ->setParameter('ids', $postIds)
-                    ->orderBy('p.createdAt', 'DESC') // Order by creation date as fallback
-                    ->getQuery()
-                    ->getResult();
-            }
-        }
+        $posts = $qb->setMaxResults(50)->getQuery()->getResult();
 
         $authorNames = $this->buildAuthorNamesMap($posts);
         $commentAuthorNames = $this->buildCommenterNamesMap($posts);
